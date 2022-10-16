@@ -18,10 +18,6 @@ init_paging ()
         : "eax", "memory");
 
     page_directory_entry_4k_t pde_4k;
-    uint32_t pde_4m;
-    page_dir[0] = (uint32_t)pde_4k;
-    page_dir[1] = (uint32_t)pde_4m;
-    
     pde_4k.Present = 1;     //present true
     pde_4k.pt_Base_address = (uint32_t)page_table >> PAGE_TABLE_RIGHT_OFF;
     pde_4k.Available_use = 0;
@@ -48,19 +44,20 @@ init_paging ()
         // page_table[j].Present = 0;
         page_table[j].val[0] = 0;
     }
-
+    uint32_t u32_pde_4k = pde_4k.val[0];
+    page_dir[0] = u32_pde_4k;
     int i =  VIDEO_MEMORY_ADDR / PAGE_SIZE_4K;
     page_table[i].p_Base_address = VIDEO_MEMORY_ADDR >> PAGE_TABLE_RIGHT_OFF;
     page_table[i].Present = 1;
-
+    page_table[i].Read_Write = 1;
 
 
     //initialize the pde_4m
-    pde_4m=0; //initialize to all 0
+    uint32_t pde_4m = 0; //initialize to all 0
     set_present(pde_4m); //set bit 0 present
     set_page_size_1(pde_4m); //set the page size 1, which is bit 7
     set_page_base_address_1(pde_4m); //set address to be 0x00
-    
-    page_dir page_table
+    set_read_write_1(pde_4m); 
+    page_dir[1] = pde_4m;
 }
 

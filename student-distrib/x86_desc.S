@@ -12,6 +12,7 @@
 .globl gdt_ptr
 .globl idt_desc_ptr, idt
 .globl page_table, page_dir
+.global gdt_desc_ptr 
 .align 4
 
 
@@ -93,6 +94,12 @@ ldt_bottom:
 
 .align 4
     .word 0 # Padding
+gdt_desc_ptr:
+    .word gdt_bottom - gdt - 1
+    .long gdt
+
+.align 4
+    .word	0 #padding
 idt_desc_ptr:
     .word idt_bottom - idt - 1
     .long idt

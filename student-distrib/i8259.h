@@ -9,8 +9,17 @@
 #include "types.h"
 
 /* Ports that each PIC sits on */
-#define MASTER_8259_PORT    0x20
-#define SLAVE_8259_PORT     0xA0
+#define MASTER_8259_PORT      0x20
+#define SLAVE_8259_PORT       0xA0
+#define MASTER_8259_PORT_0    0x20
+#define MASTER_8259_PORT_1    0X21 
+#define SLAVE_8259_PORT_0     0xA0
+#define SLAVE_8259_PORT_1     0xA1
+#define BYTE_MASK             0xFF
+#define NUM_MASTER_IRQ           8
+#define TOTAL_IRQ               16
+#define BIT_MASK              0x01
+#define CASCADE_TO_SECONDARY     2
 
 /* Initialization control words to init each PIC.
  * See the Intel manuals for details on the meaning
@@ -30,12 +39,12 @@
 /* Externally-visible functions */
 
 /* Initialize both PICs */
-void i8259_init(void);
+extern void i8259_init(void);
 /* Enable (unmask) the specified IRQ */
-void enable_irq(uint32_t irq_num);
+extern void enable_irq(uint32_t irq_num);
 /* Disable (mask) the specified IRQ */
-void disable_irq(uint32_t irq_num);
+extern void disable_irq(uint32_t irq_num);
 /* Send end-of-interrupt signal for the specified IRQ */
-void send_eoi(uint32_t irq_num);
+extern void send_eoi(uint32_t irq_num);
 
 #endif /* _I8259_H */

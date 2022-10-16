@@ -228,9 +228,9 @@ typedef union idt_desc_t {
 } idt_desc_t;
 
 /* The IDT itself (declared in x86_desc.S */
-extern idt_desc_t idt[NUM_VEC];
+extern idt_desc_t idt[NUM_VEC] __attribute__((aligned (8*256))); 
 /* The descriptor used to load the IDTR */
-extern x86_desc_t idt_desc_ptr;
+extern x86_desc_t idt_desc_ptr; //the register with base and limit
 
 /* Sets runtime parameters for an IDT entry */
 #define SET_IDT_ENTRY(str, handler)                              \
