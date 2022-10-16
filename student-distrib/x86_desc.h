@@ -49,10 +49,72 @@ typedef struct seg_desc {
             uint32_t reserved      : 1;
             uint32_t opsize        : 1;
             uint32_t granularity   : 1;
-            uint8_t  base_31_24;
+            uint8_t  base_31_24;    
         } __attribute__ ((packed));
     };
 } seg_desc_t;
+
+/* This is a 4k_page_directory_entry.  It goes in the page directory. */
+typedef struct page_directory_entry_4k {
+    union {
+        uint32_t val[1];
+        struct {
+            uint32_t Present        : 1;
+            uint32_t Read_Write     : 1;
+            uint32_t Use_Supervisor : 1;
+            uint32_t Write_through  : 1;
+            uint32_t Cache_disabled : 1;
+            uint32_t Accessed       : 1;
+            uint32_t Reserved       : 1;
+            uint32_t Page_size      : 1;
+            uint32_t Global_page    : 1;
+            uint32_t Available_use  : 3;
+            uint32_t pt_Base_address : 20; 
+        } __attribute__ ((packed));
+    };
+} page_directory_entry_4k_t;
+
+// /* This is a 4M_page_directory_entry.  It goes in the page directory. */
+// typedef struct page_directory_entry_4m {
+//     union {
+//         uint32_t val[1];
+//         struct {
+//             uint32_t Present        : 1;
+//             uint32_t Read_Write     : 1;
+//             uint32_t Use_Supervisor : 1;
+//             uint32_t Write_through  : 1;
+//             uint32_t Cache_disabled : 1;
+//             uint32_t Accessed       : 1;
+//             uint32_t dirty      : 1;
+//             uint32_t Page_size      : 1;
+//             uint32_t Global_page    : 1;
+//             uint32_t Available_use  : 3;
+//             uint32_t page_table_attribute_index : 1;
+//             uint32_t Reserved : 9;
+//             uint32_t Page_base_address : 10; 
+//         } __attribute__ ((packed));
+//     };
+// } page_directory_entry_4m_t;
+
+/* This is a page_table_entry.  It goes in the page table */
+typedef struct page_table_entry {
+    union {
+        uint32_t val[1];
+        struct {
+            uint32_t Present        : 1;
+            uint32_t Read_Write     : 1;
+            uint32_t Use_Supervisor : 1;
+            uint32_t Write_through  : 1;
+            uint32_t Cache_disabled : 1;
+            uint32_t Accessed       : 1;
+            uint32_t Dirty          : 1;
+            uint32_t Page_table_attribute_index        : 1;
+            uint32_t Global_page    : 1;
+            uint32_t Available_for_sys_programmers_use : 3;
+            uint32_t p_Base_address : 20; 
+        } __attribute__ ((packed));
+    };
+} page_table_entry_t;
 
 /* TSS structure */
 typedef struct __attribute__((packed)) tss_t {
@@ -123,6 +185,9 @@ extern uint32_t ldt;
 extern uint32_t tss_size;
 extern seg_desc_t tss_desc_ptr;
 extern tss_t tss;
+
+extern uint32_t page_dir[1024] __attribute__((aligned (4096)));
+extern page_table_entry_t page_table[1024] __attribute__((aligned (4096)));
 
 /* Sets runtime-settable parameters in the GDT entry for the LDT */
 #define SET_LDT_PARAMS(str, addr, lim)                          \
