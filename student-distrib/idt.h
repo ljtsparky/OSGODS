@@ -4,6 +4,7 @@
 #include "x86_desc.h"
 
 extern void init_idt();
+
 enum IDT_VECTORS_FIRST_20
 {
     DIVIDE_ERROR_EXC, // 0
@@ -28,7 +29,12 @@ enum IDT_VECTORS_FIRST_20
     SIMD_FLOATING_POINT_EXC // 19
 };
 
-
+#define NUM_EXCEPTION 20
+#define INT_INDEX     0x20
+#define PERSERVED_EXCEPTION 15
+#define KEYB_INTERRUPT_INDEX 0x21
+#define RTC_INTERRUPT_INDEX 0x28
+// extern void exception_handler(uint8_t i);
 
 extern void DIVIDE_ERROR_EXC_HANDLER();
 extern void DEBUG_EXC_HANDLER();

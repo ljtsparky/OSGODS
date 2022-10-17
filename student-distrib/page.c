@@ -3,56 +3,39 @@
 
 /*
  * init_paging
- *  description: initialize the paging
+ *  description: initialize the paging by creating the page dir entry correspoding to 4K and 4M, then the 4K one 
  *  input: none
  *  output: none
+ * return: none
+ * side_effect: 
  */
 void init_paging ()
-{
-    printf("try initialize paging\n");
+{  
     page_directory_entry_4k_t pde_4k;   /* pde for 4k page */
+    pde_4k.val[0] = 0;
     pde_4k.Present = 1;     //present true
-    pde_4k.pt_Base_address = (uint32_t)page_table >> PAGE_TABLE_RIGHT_OFF;
-    pde_4k.Available_use = 0;
-    pde_4k.Global_page = 0;
-    pde_4k.Page_size = 0;
-    pde_4k.Reserved = 0;
-    pde_4k.Accessed = 0;
-    pde_4k.Cache_disabled = 0;
-    pde_4k.Write_through = 0;
-    pde_4k.Use_Supervisor = 0;
-    pde_4k.Read_Write = 0;
-
+    pde_4k.pt_Base_address = (uint32_t)page_table >> PAGE_TABLE_RIGHT_OFF;//right shift 12 because we have aligned it as 4096, so 12 bits are 4096
+   
     int j; /* index for page table */
-    for (j=0; j<NUM_PTE; j++) {
-        // page_table[j].p_Base_address = 0;
-        // page_table[j].Global_page = 0;
-        // page_table[j].Page_table_attribute_index = 0;
-        // page_table[j].Dirty = 0;
-        // page_table[j].Accessed = 0;
-        // page_table[j].Cache_disabled = 0;
-        // page_table[j].Write_through = 0;
-        // page_table[j].Use_Supervisor = 0;
-        // page_table[j].Read_Write = 0;
-        // page_table[j].Present = 0;
+    for (j=0; j<NUM_PTE; j++) { //initialize the pdt and pt by 0
         page_table[j].val[0] = 0;
+        page_dir[j]=0;
     }
     uint32_t u32_pde_4k = pde_4k.val[0];
     page_dir[0] = u32_pde_4k;
-    int i =  VIDEO_MEMORY_ADDR / PAGE_SIZE_4K;
-    page_table[i].p_Base_address = VIDEO_MEMORY_ADDR >> PAGE_TABLE_RIGHT_OFF;
-    page_table[i].Present = 1;
-    page_table[i].Read_Write = 1;
-
-
+    int i =  VIDEO_MEMORY_ADDR / PAGE_SIZE_4K;  /* find the page for video memory */
+    page_table[i].p_Base_address = VIDEO_MEMORY_ADDR >> PAGE_TABLE_RIGHT_OFF;   /* load the first 20 bits of video address */
+    page_table[i].Present = 1;  /* it present now */
+    page_table[i].Read_Write = 1;   
+    page_table[i].Use_Supervisor=1;
     //initialize the pde_4m
     uint32_t pde_4m = 0; //initialize to all 0
-    pde_4m=set_present(pde_4m); //set bit 0 present
-    pde_4m=set_page_size_1(pde_4m); //set the page size 1, which is bit 7
-    pde_4m=set_page_base_address_1(pde_4m); //set address to be 0x00
-    pde_4m=set_read_write_1(pde_4m); 
+    pde_4m = set_present(pde_4m); //set bit 0 present
+    pde_4m = set_page_size_1(pde_4m); //set the page size 1, which is bit 7
+    pde_4m = set_page_base_address_1(pde_4m); //set address to be 1, which is the second 4MB
+    pde_4m = set_read_write_1(pde_4m); 
+    // pde_4m = set_use_supervisor(pde_4m);
     page_dir[1] = pde_4m;
-
     /* set the content of control regisster */
     asm volatile(
         "movl %0, %%eax      /* put the page directory address into eax*/ ;"
@@ -67,22 +50,5 @@ void init_paging ()
         "movl %%eax, %%cr0          /* set bit 31 of cr0 to 1 */            "
         :
         : "r" (page_dir)
-        : "eax");
-    /* assembly adapted from Osdev */
-
-    // asm volatile(
-	// 		 	"movl %0, %%eax;"
-	// 			"movl %%eax, %%cr3;"
-	// 			"movl %%cr4, %%eax;"
-	// 			"orl $0x010, %%eax;"
-	// 			"movl %%eax, %%cr4;"
-	// 			"movl %%cr0, %%eax;"
-	// 			"orl $0x80000000, %%eax;"
-	// 			"movl %%eax, %%cr0;"
-	// 			:
-	// 			: "r" (page_dir)
-	// 			: "eax"
-	// 	);
-    printf("paging initialize finish\n");
+        : "eax", "memory");  
 }
-

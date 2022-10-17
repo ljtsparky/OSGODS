@@ -71,6 +71,19 @@ typedef struct page_directory_entry_4k {
             uint32_t Available_use  : 3;
             uint32_t pt_Base_address : 20; 
         } __attribute__ ((packed));
+        struct {
+            uint32_t Present        : 1;
+            uint32_t Read_Write     : 1;
+            uint32_t Use_Supervisor : 1;
+            uint32_t Write_through  : 1;
+            uint32_t Cache_disabled : 1;
+            uint32_t Accessed       : 1;
+            uint32_t Reserved       : 1;
+            uint32_t Page_size      : 1;
+            uint32_t Global_page    : 1;
+            uint32_t Available_use  : 3;
+            uint32_t pt_Base_address : 20; 
+        } __attribute__ ((packed));
     };
 } page_directory_entry_4k_t;
 

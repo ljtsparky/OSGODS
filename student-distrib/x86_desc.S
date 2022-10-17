@@ -95,15 +95,18 @@ ldt_bottom:
 
 .align 4
     .word 0 # Padding
+
+# value stored in gdtr
 gdt_desc_ptr:
-    .word gdt_bottom - gdt - 1
-    .long gdt
+    .word gdt_bottom - gdt - 1  # limit
+    .long gdt   # base addresss
 
 .align 4
-    .word	0 #padding
+    .word	0 # padding
+# value stored in idt 
 idt_desc_ptr:
-    .word idt_bottom - idt - 1
-    .long idt
+    .word idt_bottom - idt - 1 # limit
+    .long idt  # base addresss
 
 
     .align  16
@@ -116,14 +119,14 @@ _idt:
 idt_bottom:
 
 
-.align 4096
+.align 4096  # use 4096, which is 4 bytes one entry * 1024 
 page_dir:
-    .rept 1024
-    .long 0
+    .rept 1024 # repeat 1024
+    .long 0    
     .endr
 page_dir_bottom:
 
-.align 4096
+.align 4096 # same as above
 page_table:
     .rept 1024
     .long 0
