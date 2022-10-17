@@ -11,4 +11,5 @@
 #define VIDEO_MEMORY_ADDR 0XB8000
 #define VIDEO_SIZE 2000
 
+extern void init_paging ();
 #endif

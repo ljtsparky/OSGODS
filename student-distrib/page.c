@@ -1,23 +1,16 @@
 #include "page.h"
 #include "x86_desc.h"
 
-init_paging ()
+/*
+ * init_paging
+ *  description: initialize the paging
+ *  input: none
+ *  output: none
+ */
+void init_paging ()
 {
-    //put the page dir physical address into CR3
-    asm volatile(
-        "movl $page_dir, %%eax      /* put the page directory address into eax*/ ;"
-        "movl %%eax, %%cr3          /* move the address into cr3 */         ;"
-        "movl %%cr0, %%eax          /* put cr0 into eax */                  ;"
-        "orl  $0x80000000, %%eax    /* set bit 31 of eax to 1*/             ;"
-        "movl %%eax, %%cr0          /* set bit 31 of cr0 to 1 */            ;"
-        "movl %%cr4, %%eax          /* put cr4 into eax */         ;"
-        "orl $0x00000010 ,%%eax     /* make the bit 4 of eax 1 */  ;"
-        "movl %%eax,%%cr4     /* move eax back into cr4, changing the bit 4 of it to 1 allowing mixed page sizes */  "
-        :
-        : 
-        : "eax", "memory");
-
-    page_directory_entry_4k_t pde_4k;
+    printf("try initialize paging\n");
+    page_directory_entry_4k_t pde_4k;   /* pde for 4k page */
     pde_4k.Present = 1;     //present true
     pde_4k.pt_Base_address = (uint32_t)page_table >> PAGE_TABLE_RIGHT_OFF;
     pde_4k.Available_use = 0;
@@ -54,10 +47,42 @@ init_paging ()
 
     //initialize the pde_4m
     uint32_t pde_4m = 0; //initialize to all 0
-    set_present(pde_4m); //set bit 0 present
-    set_page_size_1(pde_4m); //set the page size 1, which is bit 7
-    set_page_base_address_1(pde_4m); //set address to be 0x00
-    set_read_write_1(pde_4m); 
+    pde_4m=set_present(pde_4m); //set bit 0 present
+    pde_4m=set_page_size_1(pde_4m); //set the page size 1, which is bit 7
+    pde_4m=set_page_base_address_1(pde_4m); //set address to be 0x00
+    pde_4m=set_read_write_1(pde_4m); 
     page_dir[1] = pde_4m;
+
+    /* set the content of control regisster */
+    asm volatile(
+        "movl %0, %%eax      /* put the page directory address into eax*/ ;"
+        "movl %%eax, %%cr3          /* move the address into cr3 */         ;"
+
+        "movl %%cr4, %%eax          /* put cr4 into eax */         ;"
+        "orl $0x00000010 ,%%eax     /* make the bit 4 of eax 1 */  ;"
+        "movl %%eax,%%cr4     /* move eax back into cr4, changing the bit 4 of it to 1 allowing mixed page sizes */  ;"      
+         
+        "movl %%cr0, %%eax          /* put cr0 into eax */                  ;"
+        "orl  $0x80000000, %%eax    /* set bit 31 of eax to 1*/             ;"
+        "movl %%eax, %%cr0          /* set bit 31 of cr0 to 1 */            "
+        :
+        : "r" (page_dir)
+        : "eax");
+    /* assembly adapted from Osdev */
+
+    // asm volatile(
+	// 		 	"movl %0, %%eax;"
+	// 			"movl %%eax, %%cr3;"
+	// 			"movl %%cr4, %%eax;"
+	// 			"orl $0x010, %%eax;"
+	// 			"movl %%eax, %%cr4;"
+	// 			"movl %%cr0, %%eax;"
+	// 			"orl $0x80000000, %%eax;"
+	// 			"movl %%eax, %%cr0;"
+	// 			:
+	// 			: "r" (page_dir)
+	// 			: "eax"
+	// 	);
+    printf("paging initialize finish\n");
 }
 

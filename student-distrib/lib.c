@@ -473,4 +473,5 @@ void test_interrupts(void) {
     for (i = 0; i < NUM_ROWS * NUM_COLS; i++) {
         video_mem[i << 1]++;
     }
-}
+}//this function you sha yong a ? zen me li jie
+//i don't k

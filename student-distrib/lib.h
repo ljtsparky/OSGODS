@@ -17,7 +17,7 @@ void clear(void);
 
 void* memset(void* s, int32_t c, uint32_t n);
 void* memset_word(void* s, int32_t c, uint32_t n);
-void* memset_dword(void* s, int32_t c, uint32_t n);
+void* memfdword(void* s, int32_t c, uint32_t n);
 void* memcpy(void* dest, const void* src, uint32_t n);
 void* memmove(void* dest, const void* src, uint32_t n);
 int32_t strncmp(const int8_t* s1, const int8_t* s2, uint32_t n);

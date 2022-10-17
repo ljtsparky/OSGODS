@@ -13,9 +13,10 @@
 .globl idt_desc_ptr, idt
 .globl page_table, page_dir
 .global gdt_desc_ptr 
+
+
+
 .align 4
-
-
 tss_size:
     .long tss_bottom - tss - 1
 
@@ -128,3 +129,4 @@ page_table:
     .long 0
     .endr
 page_table_bottom:
+

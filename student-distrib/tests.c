@@ -1,6 +1,8 @@
 #include "tests.h"
 #include "x86_desc.h"
 #include "lib.h"
+#include "rtc.h"
+
 
 #define PASS 1
 #define FAIL 0
@@ -16,7 +18,11 @@ static inline void assertion_failure(){
 	   reserved by Intel */
 	asm volatile("int $15");
 }
-
+static inline void dividezero_exception(){
+	/* Use exception #15 for assertions, otherwise
+	   reserved by Intel */
+	asm volatile("int $0");
+}
 
 /* Checkpoint 1 tests */
 
@@ -31,7 +37,6 @@ static inline void assertion_failure(){
  */
 int idt_test(){
 	TEST_HEADER;
-
 	int i;
 	int result = PASS;
 	for (i = 0; i < 10; ++i){
@@ -44,6 +49,43 @@ int idt_test(){
 
 	return result;
 }
+// int keyboard_test(){
+// 	TEST_HEADER;
+// 	int i;
+// 	int result=PASS;
+// 	for (i=0;i<10;++i){
+		
+// 	}
+// }
+// int rtc_test(){
+// 	TEST_HEADER;
+// 	int i;
+// 	int result = PASS;
+//     init_rtc();
+//     rtc_intr_handler();
+// }
+
+// divide by zero test
+// should cause divide by zero exception
+int Divide_test(void)
+{
+	TEST_HEADER;
+	printf("divide test\n");
+	// dividezero_exception();
+	return PASS;
+}
+
+/* Test suite entry point */
+void launch_tests(){
+	TEST_OUTPUT("idt_test", idt_test());
+	TEST_OUTPUT("divide zero test",Divide_test());
+	printf("end of lauchwn test\n");
+	// TEST_OUTPUT("keyboard test",keyboard_test());
+	// TEST_OUTPUT("real time clock test",rtc_test());
+	// TEST_OUTPUT("interrupt test",interrupt_test());
+	// launch your tests here
+}
+
 
 // add more tests here
 
@@ -51,10 +93,3 @@ int idt_test(){
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
-
-
-/* Test suite entry point */
-void launch_tests(){
-	TEST_OUTPUT("idt_test", idt_test());
-	// launch your tests here
-}

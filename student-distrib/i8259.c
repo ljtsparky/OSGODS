@@ -13,6 +13,7 @@ uint8_t slave_mask;  /* IRQs 8-15 */
 
 /* Initialize the 8259 PIC */
 void i8259_init(void) {
+    printf("try initialize i8259\n");
     unsigned long flags;    /* save the current IF */
     cli_and_save(flags);    /* create the critical section */
     
@@ -40,6 +41,7 @@ void i8259_init(void) {
 
     sti();
     restore_flags(flags);   /* restore the IF */
+    printf("initialize i8259 finished\n");
 }
 
 /* enable_irq
