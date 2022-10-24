@@ -12,5 +12,8 @@
 #define AFTER_VIDEO_MEM 0xB9000
 // test launcher
 void launch_tests();
+// enum file_table{
+
+// }
 
 #endif /* TESTS_H */

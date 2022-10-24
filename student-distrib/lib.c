@@ -22,6 +22,8 @@ void clear(void) {
         *(uint8_t *)(video_mem + (i << 1)) = ' ';
         *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
     }
+    screen_x = 0;   /* go to the top left corner of the screen */
+    screen_y = 0;
 }
 
 /* Standard printf().
@@ -163,21 +165,146 @@ int32_t puts(int8_t* s) {
     return index;
 }
 
+
+int prev_screen_x[NUM_ROWS];    /* store the previous x location when '\n' is pressed */
+int i_prev_x = 0;               /* prev x location index*/
+char display_buf[NUM_COLS*NUM_ROWS];   /* display buffer */
+int display_buf_index = 0;      /* index for display input buffer */
+int line_is_full[NUM_ROWS];     /* indicate which line is full */
+
 /* void putc(uint8_t c);
  * Inputs: uint_8* c = character to print
  * Return Value: void
  *  Function: Output a character to the console */
 void putc(uint8_t c) {
-    if(c == '\n' || c == '\r') {
-        screen_y++;
-        screen_x = 0;
-    } else {
+    /* display buffer is full, clean it */
+    if (display_buf_index == NUM_COLS*NUM_ROWS) {
+        display_buf_index = 0;
+        int i;  
+        for (i=0; i<NUM_COLS*NUM_ROWS; i++) {
+            display_buf[i] = 0;
+        }  
+    }
+    /* handle backspace */
+    if (c == '\b') {
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = ' ';
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
+        /* delete Tab */
+        if (display_buf[display_buf_index - 1] == '\t') {
+            display_buf[--display_buf_index] = 0;   /* delete the Tab in keyboard buffer */
+            screen_x -= SPACES_NUM;         
+            goto draw_;         
+        }
+
+        /* delete when cur is leftmost line */
+        if (screen_x == 0 && screen_y != 0) {
+            if (line_is_full[screen_y - 1] == 1) {  /* check whether previous line is full or not*/
+                screen_x = NUM_COLS - 1;    
+                screen_y --;
+                line_is_full[screen_y] = 0; 
+                display_buf[--display_buf_index] = 0;    
+                goto draw_;
+            }
+            /* go the the previous location of x last line */
+            display_buf[--display_buf_index] = 0;
+            screen_x = prev_screen_x[--screen_y];
+            goto draw_;           
+        }
+
+        /* if at the left upper corner, do nothing */
+        if (screen_x == 0 && screen_y == 0) {
+            display_buf[--display_buf_index] = 0;
+            goto draw_;
+        }
+
+        /* normal */
+        else 
+        {
+            screen_x --;
+            display_buf[--display_buf_index] = 0;
+            goto draw_;
+        }
+    }
+
+    /* handle enter */
+    if (c == '\n' || c == '\r') {
+        /* empty ' ' in '_' */
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = ' ';
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
+        display_buf[display_buf_index++] = c;
+        /* case when enter at last line */
+        if (screen_y == NUM_ROWS - 1) {
+            prev_screen_x[screen_y] = screen_x; /* store the screen_x information */
+            screen_x = 0;
+            memmove(video_mem, video_mem + (NUM_COLS << 1), NUM_COLS*(NUM_ROWS - 1)*2); /* scroll the screen */
+            int j;  /* scroll the line is full and previous screen x information */
+            for (j=0; j<NUM_ROWS - 1; j++) {
+                    line_is_full[j]= line_is_full[j + 1];
+                    prev_screen_x[j] = prev_screen_x[j + 1];
+                }
+            int i;  
+            for (i=0; i<NUM_COLS; i++) {    /* clear the lat line */
+                *(uint8_t *)(video_mem + ((NUM_COLS * (NUM_ROWS - 1) + i) << 1)) = ' ';
+                *(uint8_t *)(video_mem + ((NUM_COLS * (NUM_ROWS - 1) + i) << 1) + 1) = ATTRIB;
+            }
+            goto draw_;
+        }
+        prev_screen_x[screen_y] = screen_x; /* store the screen_x before enter */
+        screen_y ++;    /* go to the next line */
+        screen_x = 0;       
+        goto draw_;
+    }
+
+    /* handle Tab
+     * draw four spaces when Tab pressed
+     */
+    if (c == '\t') {
+        if (screen_x >= NUM_COLS - SPACES_NUM - 1) return;  /* if no room for Tab, return*/
+        display_buf[display_buf_index++] = c;
+        int i; /* index for drawing spaces*/
+        for (i=0; i<SPACES_NUM; i++) {  /* draw four spaces */
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = ' ';
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
+            screen_x ++;
+        }
+        goto draw_;
+    }
+    /* handle normal character */
+    else {
+        /* draw the character */
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
         screen_x++;
-        screen_x %= NUM_COLS;
-        screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
+        display_buf[display_buf_index++] = c;   /* store char into display buffer */
+        if (screen_x == NUM_COLS) {     /* store line is full information */
+            if (screen_y < NUM_ROWS - 1) {
+                line_is_full[screen_y] = 1;
+                screen_y++;
+                screen_x = 0;
+            } 
+            /* char get the bottom of the screen */
+            else {
+                screen_x = 0;
+                screen_y = NUM_ROWS - 1;    /* go to the next line */
+                /* scroll the screen when at the bottom of the screen */
+                memmove(video_mem, video_mem + (NUM_COLS << 1), NUM_COLS*(NUM_ROWS - 1)*2);
+                int j;  /* index for scroll line is full and previous screen x information */
+                for (j=0; j<NUM_ROWS-1; j++) {
+                    line_is_full[j]= line_is_full[j + 1];   
+                    prev_screen_x[j] = prev_screen_x[j + 1];
+                }
+                line_is_full[NUM_ROWS - 2] = 1; /* line is full */
+                int i;  /* clean last line */
+                for (i=0; i<NUM_COLS; i++) {
+                    *(uint8_t *)(video_mem + ((NUM_COLS * (NUM_ROWS - 1) + i) << 1)) = ' ';
+                    *(uint8_t *)(video_mem + ((NUM_COLS * (NUM_ROWS - 1) + i) << 1) + 1) = ATTRIB;
+                }
+            }
+        }
     }
+draw_:  /* draw the '_' */
+    *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = '_';
+    *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
 }
 
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);
@@ -475,3 +602,17 @@ void test_interrupts(void) {
     }
 }//this function you sha yong a ? zen me li jie
 //i don't k
+
+
+/* void delay(uint32_t)
+ * Inputs: t
+ * Return Value: void
+ * Function: delay time of some loops  */
+void delay(uint32_t t)
+{
+    while (t--)
+    {
+        uint32_t i=0x800000;
+        while (i--);
+    }
+}

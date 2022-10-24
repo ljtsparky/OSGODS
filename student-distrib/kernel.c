@@ -12,7 +12,9 @@
 #include "keyboard.h"
 #include "page.h"
 #include "rtc.h"
-
+#include "terminal.h"
+#include "filesystem.h"
+#include "types.h"
 #define RUN_TESTS
 
 /* Macros. */
@@ -57,6 +59,7 @@ void entry(unsigned long magic, unsigned long addr) {
         int i;
         module_t* mod = (module_t*)mbi->mods_addr;
         while (mod_count < mbi->mods_count) {
+            file_system_start_address = mod->mod_start;     // file_system start address;
             printf("Module %d loaded at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_start);
             printf("Module %d ends at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_end);
             printf("First few bytes of module:\n");
@@ -139,7 +142,6 @@ void entry(unsigned long magic, unsigned long addr) {
         tss.esp0 = 0x800000;
         ltr(KERNEL_TSS);
     }
-
     /* Init the idt */
     init_idt();
     /* Init the paging */
@@ -150,15 +152,11 @@ void entry(unsigned long magic, unsigned long addr) {
     init_keyb();
     /* Init the rtc */
     init_rtc();
-    
-    
-    /* Initialize devices, memory, filesystem, enable device interrupts on the
-     * PIC, any other initialization stuff... */
+    /* Init the file system */
+    file_system_init(file_system_start_address);
+    /* Init the terminal */
+    terminal_init();
 
-    /* Enable interrupts */
-    /* Do not enable the following until after you have set up your
-     * IDT correctly otherwise QEMU will triple fault and simple close
-     * without showing you any output */
     printf(" Enabling Interrupts\n");
     sti();
 

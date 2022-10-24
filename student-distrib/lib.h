@@ -15,11 +15,15 @@ int8_t *strrev(int8_t* s);
 uint32_t strlen(const int8_t* s);
 void clear(void);
 
+void delay(uint32_t t);
+#define KEYB_BUFF_LEN 128
+#define SPACES_NUM 4        /* number of spaces drawed when Tab is pressed */
+
 void* memset(void* s, int32_t c, uint32_t n);
 void* memset_word(void* s, int32_t c, uint32_t n);
 void* memfdword(void* s, int32_t c, uint32_t n);
 void* memcpy(void* dest, const void* src, uint32_t n);
-void* memmove(void* dest, const void* src, uint32_t n);
+extern void* memmove(void* dest, const void* src, uint32_t n);
 int32_t strncmp(const int8_t* s1, const int8_t* s2, uint32_t n);
 int8_t* strcpy(int8_t* dest, const int8_t*src);
 int8_t* strncpy(int8_t* dest, const int8_t*src, uint32_t n);
