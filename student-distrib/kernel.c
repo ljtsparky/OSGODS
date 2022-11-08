@@ -15,6 +15,8 @@
 #include "terminal.h"
 #include "filesystem.h"
 #include "types.h"
+#include "syscall_handler.h"
+#include "syscall.h"
 #define RUN_TESTS
 
 /* Macros. */
@@ -156,16 +158,17 @@ void entry(unsigned long magic, unsigned long addr) {
     file_system_init(file_system_start_address);
     /* Init the terminal */
     terminal_init();
-
     printf(" Enabling Interrupts\n");
     sti();
+    clear();
 
 #ifdef RUN_TESTS
     /* Run tests */
-    launch_tests();
+    // launch_tests();
 #endif
     /* Execute the first program ("shell") ... */
-
+    execute((uint8_t*) "shell");
+    // halt(0);
     /* Spin (nicely, so we don't chew up cycles) */
     asm volatile (".1: hlt; jmp .1;");
 }

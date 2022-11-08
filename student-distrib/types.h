@@ -52,30 +52,44 @@ typedef unsigned char uint8_t;
 #define MAX_FILE_NUM 8
 #define MIN_FILE_NUM 0
 
-typedef struct file_jump_table
+typedef struct file_operation_table
 {
-    int32_t (*file_open)(const uint8_t filename);
-    int32_t (*file_close)(int32_t fd);
-    int32_t (*file_read)(int32_t fd, const void* buf, int32_t nbtypes);
-    int32_t (*file_write)(int32_t fd, const void* buf, int32_t nbtypes);
+    int32_t (*open)(const uint8_t* name);
+    int32_t (*read)(int32_t fd,const void* buf, int32_t nbytes);
+    int32_t (*write)(int32_t fd,const void* buf, int32_t nbytes);
+    int32_t (*close)(int32_t close);
+} file_operation_table_t;
 
-}file_jump_table_t;
+// typedef struct std
+// {
+//     int32_t (*file_open)(const uint8_t filename);
+//     int32_t (*file_close)(int32_t fd);
+//     int32_t (*file_read)(int32_t fd, const void* buf, int32_t nbtypes);
+//     int32_t (*file_write)(int32_t fd, const void* buf, int32_t nbtypes);
+// } file_operation_table_t;
 
 
 typedef struct file_object
 {
-    file_jump_table_t file_op_tb;
+    file_operation_table_t file_op_tb;
     int32_t inode;
     int32_t file_position;
     int32_t flag;
-}file_object_t;
-
-// typedef struct pcb
-// {
-//     file_object_t fd[MAX_FILE_NUM];
-// };
+} file_object_t;
 
 uint32_t file_system_start_address;              /* Starting place for file system */
+
+typedef struct pcb{
+    uint32_t pid;
+    uint32_t parent_id;
+    file_object_t file_descriptor[MAX_FILE_NUM];  
+    int32_t saved_esp;
+    int32_t saved_ebp;
+    uint32_t active;
+} pcb_t;
+
+// pcb_t* curr_pcb = NULL;
+// pcb_t* parent_pcb = NULL;
 
 #endif /* ASM */
 

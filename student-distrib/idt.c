@@ -2,6 +2,7 @@
 #include "lib.h"
 #include "keyboard.h"
 #include "rtc.h"
+#include "syscall_handler.h"
 /* exception handler function table */
 void *exception_handler_table[20] = { // we use this table to locate the function address of these handlers
     DIVIDE_ERROR_EXC_HANDLER,
@@ -25,6 +26,11 @@ void *exception_handler_table[20] = { // we use this table to locate the functio
     MACHINE_CHECK_EXC_HANDLER,
     SIMD_FLOATING_POINT_EXC_HANDLER};
 
+/*init_idt()
+ * description: initialize the idt
+ * input: none
+ * output: none
+ */
 void init_idt()
 {
     int i;
@@ -57,6 +63,9 @@ void init_idt()
     idt[KEYB_INTERRUPT_INDEX].reserved3 = 0;
     SET_IDT_ENTRY(idt[RTC_INTERRUPT_INDEX], rtc_intr_handler); // rtc interrupt
     idt[RTC_INTERRUPT_INDEX].reserved3 = 0;
+    idt[SYSTEM_CALL_INT].dpl = 3;
+    SET_IDT_ENTRY(idt[SYSTEM_CALL_INT], syscall_linkage);
+    
 }
 
 /* DIVIDE_ERROR_EXC_HANDLER:

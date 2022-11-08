@@ -34,6 +34,7 @@ enum IDT_VECTORS_FIRST_20
 #define PERSERVED_EXCEPTION 15
 #define KEYB_INTERRUPT_INDEX 0x21
 #define RTC_INTERRUPT_INDEX 0x28
+#define SYSTEM_CALL_INT 0x80
 // extern void exception_handler(uint8_t i);
 
 extern void DIVIDE_ERROR_EXC_HANDLER();
@@ -56,5 +57,6 @@ extern void X87_FPU_FLOATING_POINT_ERROR_HANDLER();
 extern void ALIGNMENT_CHECK_EXC_HANDLER();
 extern void MACHINE_CHECK_EXC_HANDLER();
 extern void SIMD_FLOATING_POINT_EXC_HANDLER();
+//these are 20 exception handlers
 
 #endif

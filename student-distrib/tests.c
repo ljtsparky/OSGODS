@@ -281,38 +281,6 @@ int file_test_2(uint32_t index)
 	return PASS;
 }
 
-// name test;
-/*
- *name:file_test_long
- *function: this function will print file content with  name
- *test functions: read_dentry_by_name, read_data
- *input: name index
- *output: print figure
- */
- int file_test_111(int cmd){
-	clear();
-	char* file_name;
-	switch (cmd){
-		case 1: file_name = "hello"; break;
-		case 2: file_name = "verylargetextwithverylongname.txt";	 break;
-		case 3: file_name = "frame0.txt"; break;
-		default: 
-			printf("wrong cmd!");
-			return FAIL;
-	}
-	file_open(file_name);
-	int8_t buf[50*1024];					
-	int32_t i, count;
-	count = file_read(1, buf, 50*1024);				//6000 is the size of the buf
-	printf("Bytes read: %d\n", count);
-	for (i = 0; i < count; i++) {
-		if (buf[i] != '\0') {
-			putc(buf[i]);
-		}
-	}
-	file_close(0);
-	return PASS;
-}
 
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
@@ -349,14 +317,13 @@ void launch_tests()
 	// clear();
 	// TEST_OUTPUT("test file", file_test_3(4));
 	// delay(100);
-	clear();
-	TEST_OUTPUT("test file", file_test_111(3));
-	delay(100);
-	clear();
-	TEST_OUTPUT("test file", file_test_111(2));
-	delay(100);
-	clear();
-	TEST_OUTPUT("test file", file_test_111(1));
-	delay(100);
-	// launch your tests here
+	// clear();
+	// delay(100);
+	// clear();
+	// TEST_OUTPUT("test file", file_test_111(2));
+	// delay(100);
+	// clear();
+	// TEST_OUTPUT("test file", file_test_111(1));
+	// delay(100);
+	// // launch your tests here
 }

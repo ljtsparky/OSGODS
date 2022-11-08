@@ -88,8 +88,7 @@ int32_t rtc_close (int32_t fd)
 int32_t rtc_read (int32_t fd, void* buf, int32_t nbytes)
 {
     while (rtc_interrupt_occurred != 1){}      //when an interrupt doesn't occur, just wait
-        
-   
+    printf("in rtc read\n");
     rtc_interrupt_occurred = 0;              //reset the flag after an interrupt
     return 0;
 }
@@ -105,14 +104,10 @@ int32_t rtc_read (int32_t fd, void* buf, int32_t nbytes)
 int32_t rtc_write (int32_t fd, const void* buf, int32_t nbytes)
 {
     /* check for the fail condition */
-    if (nbytes != 4){                 //the integer must be 4 bytes
+    cli();
+    if (nbytes != 4 || NULL == buf ){//the integer must be 4 bytes & the pointer can't be NULL
         return -1;
     }
-
-    if (buf == NULL){                 //the pointer can't be NULL
-        return -1;
-    }
-
     int32_t rtc_frequency;
     rtc_frequency = *((int32_t*)buf);   //get the frequency to write
     if ((rtc_frequency < MIN_FREQ) || (rtc_frequency > MAX_FREQ)){         //test of in the range of normal frequency
@@ -131,8 +126,8 @@ int32_t rtc_write (int32_t fd, const void* buf, int32_t nbytes)
             rate = i + 1;
         }
     }
-    rate &= 0x0F;
-    cli();
+    rate &= 0x0F;                                 //to have the low 4 bits of rate
+    
     outb(RTC_STATUS_REG_A, RTC_REG_PORT);         //change to new frequency
     outb(rate, CMOS_PORT);
     sti();

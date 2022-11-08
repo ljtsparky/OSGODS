@@ -201,11 +201,10 @@ void keyb_intr_handler ()
         if (display_char == '\n') {
             // char 
             // terminal_read(0,)
-            copy_signal = 1;    /* copy signal is abled */
-            int temp = terminal_read(0, buf, keyb_index); //record the number of bytes we read
-            terminal_write(0, buf, temp); //write it out
+            set_signal_enable();
+            // int temp = terminal_read(0, buf, keyb_index); //record the number of bytes we read
+            // terminal_write(0, buf, temp); //write it out
         }
-        
     }
 /* return cancel the critical section and send EOI*/
 end:

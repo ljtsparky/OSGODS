@@ -38,7 +38,7 @@ typedef struct inode_t
 file_object_t FILE_ARRAY[8];      // max 8 files;
 inode_t* inodes; 
 boot_block_t* boot_block;
-dentry_t* DENTRY;
+// dentry_t* DENTRY;
 uint8_t *data_block;
 dentry_t global_dentry;
 
