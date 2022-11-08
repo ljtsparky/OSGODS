@@ -1,4 +1,3 @@
-
 ## BUG 1
 
 **Expected Result：** Press q on the keyboard, display single q on the screen
@@ -37,3 +36,8 @@ which is 0x400000 to right shift 12 because 12 is exactly 4MB, as a result we ge
 
 ## BUG 7
 2022 Oct 24 Li Jiatong: terminal didn't show the terminal writing information because we wrongly made the keyboard index as its input nbytes, however, the keyb index is cleared in the terminal_read, so it is 0 when it goes to write. To solve this , we just used the return value of read to be the input value of write.
+## BUG 8
+2022 Nov 7 Shen Xing: first we find that our ls command cannot jump to the halt and return to the execute, this is a really hard bug that cost us several hours. Then we find that it is bucause our pid and parent_id wrong, and we set them in the create pcb and the execute, then the functions works quite well.
+
+## BUG 9
+2022 NOV 7 Shen Xing: also the bug that happens in halt and execute, when we execute halt, we found that our function jump into a unknown place. So we check the halt function for a while, it is not a difficult bug, and finally we found that we didn't set the current pcb in the halt function.
