@@ -181,7 +181,7 @@ int32_t file_write(int32_t fd, const void* buf, int32_t nbytes)
  *        nbytes -- read length
  *output: readlenth, or 0 for reach end, or -1 fail
  */
-int32_t file_read(int32_t fd, const void* buf, int32_t nbytes)
+int32_t file_read(int32_t fd, void* buf, int32_t nbytes)
 {
     //int32_t offset = get_fd_from(fd)->file_position;
     //int32_t inode = get_fd_from(fd)->inode;
@@ -190,11 +190,13 @@ int32_t file_read(int32_t fd, const void* buf, int32_t nbytes)
     //int offset = 0;
     printf("in file read\n");
     pcb_t* cur_pcb;
+    cur_pcb=get_current_pcb();
     uint32_t inode = cur_pcb->file_descriptor[fd].inode;
     uint32_t offset = cur_pcb->file_descriptor[fd].file_position;
     //uint8_t* buf1= (uint8_t*) buf;
     //
-    uint32_t read_nbytes = read_data(global_dentry.inode_id, offset, buf, nbytes);
+    // uint32_t read_nbytes = read_data(global_dentry.inode_id, offset, buf, nbytes);
+    uint32_t read_nbytes = read_data(inode, offset, buf, nbytes);
     if (read_nbytes < 0)
     {
         return -1;
@@ -244,7 +246,7 @@ int32_t dir_close(int32_t fd)
  *        nbytes -- length
  *output: 0 success, -1 fail
  */
-int32_t dir_read(int32_t fd, const void* buf, int32_t nbytes)
+int32_t dir_read(int32_t fd, void* buf, int32_t nbytes)
 {
     dentry_t dentry;
     pcb_t* cur_pcb = get_current_pcb();

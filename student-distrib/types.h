@@ -55,19 +55,10 @@ typedef unsigned char uint8_t;
 typedef struct file_operation_table
 {
     int32_t (*open)(const uint8_t* name);
-    int32_t (*read)(int32_t fd,const void* buf, int32_t nbytes);
-    int32_t (*write)(int32_t fd,const void* buf, int32_t nbytes);
+    int32_t (*read)(int32_t fd, void* buf, int32_t nbytes);
+    int32_t (*write)(int32_t fd, const void* buf, int32_t nbytes);
     int32_t (*close)(int32_t close);
 } file_operation_table_t;
-
-// typedef struct std
-// {
-//     int32_t (*file_open)(const uint8_t filename);
-//     int32_t (*file_close)(int32_t fd);
-//     int32_t (*file_read)(int32_t fd, const void* buf, int32_t nbtypes);
-//     int32_t (*file_write)(int32_t fd, const void* buf, int32_t nbtypes);
-// } file_operation_table_t;
-
 
 typedef struct file_object
 {

@@ -10,8 +10,8 @@
 #include "syscall_handler.h"
 #include "context_switch.h"
 
-file_operation_table_t stdin_table1 = (file_operation_table_t){terminal_open, terminal_read, terminal_bad_read_write, terminal_close};
-file_operation_table_t stdout_table1 = (file_operation_table_t){terminal_open, terminal_bad_read_write, terminal_write, terminal_close};
+file_operation_table_t stdin_table1 = (file_operation_table_t){terminal_open, terminal_read, terminal_bad_write, terminal_close};
+file_operation_table_t stdout_table1 = (file_operation_table_t){terminal_open, terminal_bad_read, terminal_write, terminal_close};
 file_operation_table_t fail_table = (file_operation_table_t){fail, fail, fail, fail};
 
 int fail()
@@ -47,7 +47,7 @@ int32_t execute (const uint8_t* command)
     if (command == NULL) return -1; /* empty command, fail */
     printf("command is %s\n",command);
     // delay(100);
-    if (!strncmp(command, "shell", 5)) { 
+    if (!strncmp((int8_t*)command, "shell", 5)) { 
         printf("in shell now\n");
         curr_pcb = NULL;
         parent_pcb = NULL;
@@ -74,7 +74,7 @@ int32_t execute (const uint8_t* command)
     if (EXE_FILE_LEN != read_data(dentry.inode_id, 0, buf, EXE_FILE_LEN)) return -1;   /* reading data fails*/
     // printf("after read data check\n");
 
-    if (strncmp(buf, exe_magic_table, EXE_MAGIC_TABLE_LEN)) return -1;  /* the file is not executable */
+    if (strncmp((int8_t*)buf, (int8_t*)exe_magic_table, EXE_MAGIC_TABLE_LEN)) return -1;  /* the file is not executable */
     // printf("after magic number check\n");
 
     uint8_t entry_point_buf[ENTRY_POINT_LEN];
@@ -87,7 +87,7 @@ int32_t execute (const uint8_t* command)
     // printf("after paging\n");
 
     /* ------------------------------ load file into memory --------------------------------------*/
-    if (inodes[dentry.inode_id].length !=read_data(dentry.inode_id, 0, PROGRAM_IMAG_ADDR, inodes[dentry.inode_id].length)) return -1;
+    if (inodes[dentry.inode_id].length !=read_data(dentry.inode_id, 0, (uint8_t*)PROGRAM_IMAG_ADDR, inodes[dentry.inode_id].length)) return -1;
     // read_data(dentry->inode_id, 0, PROGRAM_IMAG_ADDR, 0x400000);
     // printf("after loading file\n");
     /* ------------------------------ execute create pcb -----------------------------------------*/
@@ -138,7 +138,7 @@ int32_t halt (uint8_t status){
     cli();
 
     pcb_t* pcb_cur = get_current_pcb();
-    pcb_t* pcb_prev = pcb_cur->parent_id;
+    pcb_t* pcb_prev =(pcb_t*) pcb_cur->parent_id;
 
 
     /* set all present flags in PCB to "Not In Use" to close all the relative fd */
@@ -152,7 +152,7 @@ int32_t halt (uint8_t status){
     printf( "pid: %d parent_id: %d", pcb_cur->pid, pcb_cur->parent_id);
 
     /* check if the current shell is base shell */
-    if (pcb_cur->pid != pcb_cur->parent_id ){
+    if (pcb_cur->pid == pcb_cur->parent_id ){
         pid=0;
         unmap_paging();
         execute((uint8_t *)"shell");     //if it is the base shell, re-spawn a new base shell
@@ -180,58 +180,6 @@ int32_t halt (uint8_t status){
 
 }
 
-//halt1
-//description:
-//input:
-//output:
-//return:
-//side effect:
-int32_t halt1 (uint8_t status)
-{
-    //printf("now in halt\n");
-    cli();
-    //if (status = EXCEPTION_NUMBER){    
-    //}
-    /*Check if base shell*/
-
-    execute("shell");
-    
-    curr_pcb = get_current_pcb();
-    
-    curr_pcb -> active = 0;
-
-    /* Restore parent data*/
-    int i;
-    uint32_t parent_process_id = curr_pcb -> parent_id;
-    uint32_t parent_esp = curr_pcb -> saved_esp;
-    uint32_t parent_ebp = curr_pcb -> saved_ebp;
-
-   
-    /*close relevant fd*/
-    for (i = 0; i < MAX_FILE_NUM; i++){
-        //curr_pcb -> file_descriptor[i].flag = 0;
-        close(i);
-    }
-
-    /*Restore parent paging*/
-    tss.ss0 = KERNEL_DS;
-    tss.esp0 = parent_esp;
-    // set_up_paging(parent_process_id);
-
-    // if (curr_pcb -> pid == curr_pcb->parent_id){
-    //     execute((uint8_t*)"shell");
-    // }
-    /*jump to execute return*/
-    asm volatile(
-        "movl %2, %%ebp;"
-        "movl %1, %%esp;"
-        "movl %0, %%eax;"
-        "jmp halt_return;"
-        :
-        :"r"((uint32_t)status), "r"(parent_esp), "r"(parent_ebp)
-        :"%eax"
-    );
-}
 //parse_cmd
 //description: make the first part of command regardless of ' ' to be the filename, and the second part of command saved in buffer
 //input: command string, filename, buffer
@@ -348,7 +296,7 @@ void context_switch(pcb_t* pcb, uint8_t* entry_ptr)
     uint32_t eip = *(uint32_t*) entry_ptr;
     // printf("in context switch!!!!!!!!!!!!\n");
     // printf("%d \n",eip);
-    context_switch_ASM(eip);
+    context_switch_ASM((uint32_t*)eip);
     printf("switch done!\n");
     // asm volatile(
     //     "pushl  %0;"  
@@ -420,13 +368,6 @@ void context_switch(pcb_t* pcb, uint8_t* entry_ptr)
 */
 pcb_t* get_current_pcb()
 {
-    // pcb_t* pcb;
-    // asm volatile(
-    //      "andl %%esp, %0"
-    //      : "=r" (pcb)
-    //      : "r" (0xFFFFE000)
-    //      );
-    // return pcb;
     return curr_pcb;
 }
 
@@ -439,3 +380,41 @@ pcb_t* get_parent_pcb()
     return parent_pcb;
 }
 
+// int32_t halt1 (uint8_t status)
+// {
+//     //printf("now in halt\n");
+//     cli();
+//     //if (status = EXCEPTION_NUMBER){    
+//     //}
+//     /*Check if base shell*/
+//     execute("shell");
+//     curr_pcb = get_current_pcb();
+//     curr_pcb -> active = 0;
+//     /* Restore parent data*/
+//     int i;
+//     uint32_t parent_process_id = curr_pcb -> parent_id;
+//     uint32_t parent_esp = curr_pcb -> saved_esp;
+//     uint32_t parent_ebp = curr_pcb -> saved_ebp;
+//     /*close relevant fd*/
+//     for (i = 0; i < MAX_FILE_NUM; i++){
+//         //curr_pcb -> file_descriptor[i].flag = 0;
+//         close(i);
+//     }
+//     /*Restore parent paging*/
+//     tss.ss0 = KERNEL_DS;
+//     tss.esp0 = parent_esp;
+//     // set_up_paging(parent_process_id);
+//     // if (curr_pcb -> pid == curr_pcb->parent_id){
+//     //     execute((uint8_t*)"shell");
+//     // }
+//     /*jump to execute return*/
+//     asm volatile(
+//         "movl %2, %%ebp;"
+//         "movl %1, %%esp;"
+//         "movl %0, %%eax;"
+//         "jmp halt_return;"
+//         :
+//         :"r"((uint32_t)status), "r"(parent_esp), "r"(parent_ebp)
+//         :"%eax"
+//     );
+// }

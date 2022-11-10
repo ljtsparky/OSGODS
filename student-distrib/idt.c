@@ -76,8 +76,8 @@ void init_idt()
 void DIVIDE_ERROR_EXC_HANDLER()
 {
     printf("DIVIDE_ERROR_EXC_HANDLER!!\n");
-    while (1)
-        ;
+    // halt(DIVIDE_ERROR_EXC);
+    halt(0);
 }
 
 /* DEBUG_EXC_HANDLER:
@@ -88,8 +88,8 @@ void DIVIDE_ERROR_EXC_HANDLER()
 void DEBUG_EXC_HANDLER()
 {
     printf("DEBUG_EXC_HANDLER!!\n");
-    while (1)
-        ;
+    // halt(DEBUG_EXC);
+    halt(0);
 }
 
 /* NMI_INTERRUPT_HANDLER:
@@ -100,8 +100,8 @@ void DEBUG_EXC_HANDLER()
 void NMI_INTERRUPT_HANDLER()
 {
     printf("NMI_INTERRUPT_HANDLER!!\n");
-    while (1)
-        ;
+    // halt(NMI_INTERRUPT);
+    halt(0);
 }
 
 /* BREAKPOINT_EXC_HANDLER:
@@ -112,8 +112,8 @@ void NMI_INTERRUPT_HANDLER()
 void BREAKPOINT_EXC_HANDLER()
 {
     printf("BREAKPOINT_EXC_HANDLER!!\n");
-    while (1)
-        ;
+    // halt(BREAKPOINT_EXC);
+    halt(0);
 }
 
 /* OVERFLOW_EXC_HANDLER:
@@ -124,8 +124,8 @@ void BREAKPOINT_EXC_HANDLER()
 void OVERFLOW_EXC_HANDLER()
 {
     printf("OVERFLOW_EXC_HANDLER!!\n");
-    while (1)
-        ;
+    // halt(OVERFLOW_EXC);
+    halt(0);
 }
 
 /* BOUND_RANGE_EXCEEDED_EXC_HANDLER:
@@ -136,8 +136,8 @@ void OVERFLOW_EXC_HANDLER()
 void BOUND_RANGE_EXCEEDED_EXC_HANDLER()
 {
     printf("BOUND_RANGE_EXCEEDED_EXC_HANDLER!!\n");
-    while (1)
-        ;
+    // halt(BOUND_RANGE_EXCEEDED_EXC);
+    halt(0);
 }
 
 /* INVALID_OPCODE_EXC_HANDLER:
@@ -148,8 +148,8 @@ void BOUND_RANGE_EXCEEDED_EXC_HANDLER()
 void INVALID_OPCODE_EXC_HANDLER()
 {
     printf("INVALID_OPCODE_EXC_HANDLER!!\n");
-    while (1)
-        ;
+    // halt(INVALID_OPCODE_EXC);
+    halt(0);
 }
 
 /* DEVICE_NOT_AVAILABLE_EXC_HANDLER:
@@ -160,8 +160,8 @@ void INVALID_OPCODE_EXC_HANDLER()
 void DEVICE_NOT_AVAILABLE_EXC_HANDLER()
 {
     printf("DEVICE_NOT_AVAILABLE_EXC_HANDLER!!\n");
-    while (1)
-        ;
+    // halt(DEVICE_NOT_AVAILABLE_EXC);
+    halt(0);
 }
 
 /* DOUBLE_FAULT_EXC_HANDLER:
@@ -172,8 +172,8 @@ void DEVICE_NOT_AVAILABLE_EXC_HANDLER()
 void DOUBLE_FAULT_EXC_HANDLER()
 {
     printf("DOUBLE_FAULT_EXC_HANDLER!!\n");
-    while (1)
-        ;
+    // halt(DOUBLE_FAULT_EXC);
+    halt(0);
 }
 
 /* COPROCESSOR_SEGMENT_OVERRUN_HANDLER:
@@ -184,8 +184,8 @@ void DOUBLE_FAULT_EXC_HANDLER()
 void COPROCESSOR_SEGMENT_OVERRUN_HANDLER()
 {
     printf("COPROCESSOR_SEGMENT_OVERRUN_HANDLER!!\n");
-    while (1)
-        ;
+    // halt(COPROCESSOR_SEGMENT_OVERRUN);
+    halt(0);
 }
 
 /* INVALID_TSS_EXC_HANDLER:
@@ -196,8 +196,8 @@ void COPROCESSOR_SEGMENT_OVERRUN_HANDLER()
 void INVALID_TSS_EXC_HANDLER()
 {
     printf("INVALID_TSS_EXC_HANDLER!!\n");
-    while (1)
-        ;
+    // halt(INVALID_TSS_EXC);
+    halt(0);
 }
 
 /* SEGMENT_NOT_PRESENT_HANDLER:
@@ -208,8 +208,8 @@ void INVALID_TSS_EXC_HANDLER()
 void SEGMENT_NOT_PRESENT_HANDLER()
 {
     printf("SEGMENT_NOT_PRESENT_HANDLER!!\n");
-    while (1)
-        ;
+    // halt(SEGMENT_NOT_PRESENT);
+    halt(0);
 }
 
 /* STACK_FAULT_EXCEPTION_HANDLER:
@@ -220,8 +220,8 @@ void SEGMENT_NOT_PRESENT_HANDLER()
 void STACK_FAULT_EXCEPTION_HANDLER()
 {
     printf("STACK_FAULT_EXCEPTION_HANDLER!!\n");
-    while (1)
-        ;
+    // halt(STACK_FAULT_EXCEPTION);
+    halt(0);
 }
 
 /* GENERAL_PROTECTION_EXC_HANDLER:
@@ -232,8 +232,8 @@ void STACK_FAULT_EXCEPTION_HANDLER()
 void GENERAL_PROTECTION_EXC_HANDLER()
 {
     printf("GENERAL_PROTECTION_EXC_HANDLER!!\n");
-    while (1)
-        ;
+    // halt(GENERAL_PROTECTION_EXC);
+    halt(0);
 }
 
 /* PAGE_FAULT_EXC_HANDLER:
@@ -244,8 +244,8 @@ void GENERAL_PROTECTION_EXC_HANDLER()
 void PAGE_FAULT_EXC_HANDLER()
 {
     printf("PAGE_FAULT_EXC_HANDLER!!\n");
-    while (1)
-        ;
+    // halt(PAGE_FAULT_EXC);
+    halt(0);
 }
 
 /* PRESERVED_HANDLER:
@@ -256,8 +256,8 @@ void PAGE_FAULT_EXC_HANDLER()
 void PRESERVED_HANDLER()
 {
     printf("PRESERVED_HANDLER!!\n");
-    while (1)
-        ;
+    // halt(PRESERVED);
+    halt(0);
 }
 
 /* X87_FPU_FLOATING_POINT_ERROR_HANDLER:
@@ -268,8 +268,7 @@ void PRESERVED_HANDLER()
 void X87_FPU_FLOATING_POINT_ERROR_HANDLER()
 {
     printf("X87_FPU_FLOATING_POINT_ERROR_HANDLER!!\n");
-    while (1)
-        ;
+    halt(0);
 }
 
 /* MACHINE_CHECK_EXC_HANDLER:
@@ -280,8 +279,7 @@ void X87_FPU_FLOATING_POINT_ERROR_HANDLER()
 void ALIGNMENT_CHECK_EXC_HANDLER()
 {
     printf("ALIGNMENT_CHECK_EXC_HANDLER!!\n");
-    while (1)
-        ;
+    halt(0);
 }
 
 /* MACHINE_CHECK_EXC_HANDLER:
@@ -292,8 +290,7 @@ void ALIGNMENT_CHECK_EXC_HANDLER()
 void MACHINE_CHECK_EXC_HANDLER()
 {
     printf("MACHINE_CHECK_EXC_HANDLER!!\n");
-    while (1)
-        ;
+    halt(0);
 }
 
 /* SIMD_FLOATING_POINT_EXC_HANDLER:
@@ -304,6 +301,5 @@ void MACHINE_CHECK_EXC_HANDLER()
 void SIMD_FLOATING_POINT_EXC_HANDLER()
 {
     printf("SIMD_FLOATING_POINT_EXC_HANDLER!!\n");
-    while (1)
-        ;
+    halt(0);
 }

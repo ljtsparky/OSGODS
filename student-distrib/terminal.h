@@ -6,10 +6,11 @@
 
 void terminal_init();
 char* get_terminal_buf();
-int terminal_open(const uint8_t* name);
-int terminal_close(int32_t fd);
-int terminal_bad_read_write(int32_t fd, void* buf ,int nbytes);
-int terminal_read(int32_t fd, void* buf ,int nbytes);
-int terminal_write(int32_t fd, void* buf ,int nbytes);
+int32_t terminal_open(const uint8_t* name);
+int32_t terminal_close(int32_t fd);
+int32_t terminal_bad_read(int32_t fd, void* buf ,int32_t nbytes);
+int32_t terminal_bad_write(int32_t fd, const void* buf ,int32_t nbytes);
+int32_t terminal_read(int32_t fd, void* buf ,int32_t nbytes);
+int32_t terminal_write(int32_t fd, const void* buf ,int32_t nbytes);
 void set_signal_enable();
 #endif

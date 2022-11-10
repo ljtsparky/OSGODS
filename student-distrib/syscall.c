@@ -8,8 +8,8 @@
 #include "execute.h"
 #include "page.h"
 
-file_operation_table_t stdin_table = {terminal_open, terminal_read, terminal_bad_read_write, terminal_close};
-file_operation_table_t stdout_table = {terminal_open, terminal_bad_read_write, terminal_write, terminal_close};
+file_operation_table_t stdin_table = {terminal_open, terminal_read, terminal_bad_write, terminal_close};
+file_operation_table_t stdout_table = {terminal_open, terminal_bad_read, terminal_write, terminal_close};
 file_operation_table_t rtc_table = {rtc_open, rtc_read, rtc_write, rtc_close};
 file_operation_table_t dir_table = {dir_open, dir_read, dir_write, dir_close};
 file_operation_table_t file_table = {file_open, file_read, file_write, file_close};

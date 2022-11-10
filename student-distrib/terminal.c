@@ -6,8 +6,12 @@ int num_bytes_to_copy=0;
 char terminal_buf[TERMINAL_BUF_MAX];
 int terminal_buf_index;
 
-int terminal_bad_read_write(int32_t fd, void* buf ,int nbytes){
-    printf("bad read/write!!");
+int terminal_bad_read(int32_t fd, void* buf ,int nbytes){
+    printf("terminal bad read!!\n");
+    return -1;
+}
+int terminal_bad_write(int32_t fd, const void* buf ,int nbytes){
+    printf("terminal bad write!!\n");
     return -1;
 }
 //terminal_init
@@ -35,7 +39,7 @@ char* get_terminal_buf(){
 //terminal_open
 //by opening, we want the terminal buffer set to all zero inside and make the index back to 0
 //input: none   output: terminal opened msg   return: 0 for success   no side-effect
-int terminal_open(const uint8_t* name){
+int32_t terminal_open(const uint8_t* name){
     int i;
     for(i=0;i<TERMINAL_BUF_MAX;i++){
         terminal_buf[i]=0;
@@ -48,7 +52,7 @@ int terminal_open(const uint8_t* name){
 //terminal_close
 //clear the buffer, set 0 of index count
 //input: none    output: none    return: 0 for success    no side-effect
-int terminal_close(int32_t fd){
+int32_t terminal_close(int32_t fd){
     int i;
     for (i=0;i<TERMINAL_BUF_MAX;i++){
         terminal_buf[i]=0;
@@ -68,7 +72,7 @@ void set_signal_enable()
 //input: file descriptor, buffer pointer to be copied into, nbytes: how many bytes to write into buf
 //output: if normal, print message, if not , print wrong case message
 //return: how many bytes are successfully read     no side-effect
-int terminal_read(int32_t fd, void* buf ,int nbytes){   
+int32_t terminal_read(int32_t fd, void* buf ,int32_t nbytes){   
      
     printf("in terminal read 1\n");
     while(!terminal_read_enable_signal);
@@ -102,7 +106,7 @@ int terminal_read(int32_t fd, void* buf ,int nbytes){
 //output: the characters in the buffer, from the start to the num of bytes
 //return : number of bytes that is displayed.
 //side effect: none
-int terminal_write(int32_t fd, void* buf, int nbytes){
+int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
     int i;
     char* buf1 = (char*)buf;
     // printf("shell>> "); //mark
