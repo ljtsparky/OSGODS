@@ -11,11 +11,13 @@
 #define VIDEO_MEMORY_ADDR 0XB8000
 #define VIDEO_SIZE 2000
 
-#define set_page_base_address_usr1(x) ( (x) | (0x800000 << 22 ) )  /* first 22 bits of 8Mb, the shell */
-#define set_page_base_address_usr2(x) ( (x) | (0xC00000 << 22 ) )  /* first 22 bits of 12Mb */
+#define set_page_base_address_usr1(x) ( (x) | (0x800000 ) )  /* first 22 bits of 8Mb, the shell */
+#define set_page_base_address_usr2(x) ( (x) | (0xC00000 ) )  /* first 22 bits of 12Mb */
+#define set_page_base_address_usr3(x) ( (x) | (0x1000000 ) )  /* first 22 bits of 16Mb */
 
 extern void init_paging ();
 extern void flush_tlb(unsigned int* page_dir);
+void set_user_video_map();
 int set_up_paging(int pid);
 void unmap_paging();
 

@@ -11,7 +11,7 @@
 .globl tss, tss_desc_ptr, ldt, ldt_desc_ptr
 .globl gdt_ptr
 .globl idt_desc_ptr, idt
-.globl page_table, page_dir
+.globl page_table, page_dir ,page_vid_table
 .global gdt_desc_ptr 
 
 
@@ -133,3 +133,13 @@ page_table:
     .endr
 page_table_bottom:
 
+.align 4096 # same as above
+page_vid_table:
+    .rept 1024
+    .long 0
+    .endr
+page_vid_table_bottom:
+
+
+
+    

@@ -87,6 +87,7 @@ int set_up_paging(int pid)
     pde_4m_usr = set_page_size_1(pde_4m_usr); //set the page size 1, which is bit 7
     if (pid == 0)  pde_4m_usr = set_page_base_address_usr1(pde_4m_usr); // set the base address in physics memory for first program
     if (pid == 1)  pde_4m_usr = set_page_base_address_usr2(pde_4m_usr); // set the base address in physics memory for second program
+    if (pid == 2)  pde_4m_usr = set_page_base_address_usr3(pde_4m_usr); // set the base address in physics memory for second program
     pde_4m_usr = set_read_write_1(pde_4m_usr); 
     pde_4m_usr = set_use_supervisor(pde_4m_usr); //set user supervisor 1 
     page_dir[32] = pde_4m_usr;  /* virtual memory is 128MB so index of page dir is 128MB / 4MB = 32*/
@@ -96,6 +97,11 @@ int set_up_paging(int pid)
     return 0;
 }
 
+/*unmap_paging()
+* description: unmap paging for a process
+* input:none
+* return: none
+*/
 void unmap_paging()
 {
     cli();
@@ -104,3 +110,22 @@ void unmap_paging()
     sti();
 }
 
+/*set_user_video_map()
+* description: set the user video map
+* input: none
+* ouput: none
+*/
+void set_user_video_map()
+{
+    int i;
+    page_dir[33]=0;
+    page_dir[33]= 0x7 | (int32_t)page_vid_table;    //get the low three bits of the address
+    for (i=0;i<1024;i++){                          //size of page table
+        page_vid_table[i].val[0]=0;
+    }
+    page_vid_table[0].p_Base_address = 0xB8;   //the first 12 bits for video memory
+    page_vid_table[0].Use_Supervisor = 1;
+    page_vid_table[0].Present = 1;
+    page_vid_table[0].Read_Write = 1;
+    flush_tlb(page_dir);
+}

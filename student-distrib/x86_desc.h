@@ -201,7 +201,7 @@ extern tss_t tss;
 
 extern uint32_t page_dir[1024] __attribute__((aligned (4096)));
 extern page_table_entry_t page_table[1024] __attribute__((aligned (4096)));
-
+extern page_table_entry_t page_vid_table[1024] __attribute__((aligned (4096)));
 /* Sets runtime-settable parameters in the GDT entry for the LDT */
 #define SET_LDT_PARAMS(str, addr, lim)                          \
 do {                                                            \

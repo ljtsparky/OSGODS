@@ -58,11 +58,10 @@ void init_idt()
     {
         SET_IDT_ENTRY(idt[i], exception_handler_table[PERSERVED_EXCEPTION]);
     }
-
-    SET_IDT_ENTRY(idt[KEYB_INTERRUPT_INDEX], keyb_intr_handler); // keboard interrupt
     idt[KEYB_INTERRUPT_INDEX].reserved3 = 0;
-    SET_IDT_ENTRY(idt[RTC_INTERRUPT_INDEX], rtc_intr_handler); // rtc interrupt
+    SET_IDT_ENTRY(idt[KEYB_INTERRUPT_INDEX], keyb_intr_handler); // keboard interrupt
     idt[RTC_INTERRUPT_INDEX].reserved3 = 0;
+    SET_IDT_ENTRY(idt[RTC_INTERRUPT_INDEX], rtc_intr_handler); // rtc interrupt
     idt[SYSTEM_CALL_INT].dpl = 3;
     SET_IDT_ENTRY(idt[SYSTEM_CALL_INT], syscall_linkage);
     
@@ -246,6 +245,7 @@ void PAGE_FAULT_EXC_HANDLER()
     printf("PAGE_FAULT_EXC_HANDLER!!\n");
     // halt(PAGE_FAULT_EXC);
     halt(0);
+    // while(1);
 }
 
 /* PRESERVED_HANDLER:

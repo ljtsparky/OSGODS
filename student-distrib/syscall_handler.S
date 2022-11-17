@@ -12,39 +12,42 @@
 
 
 syscall_linkage:
-    PUSHFL # first, push eflags and all registers except eax
+  
     pushl %ebx
     pushl %ecx
     pushl %edx
     pushl %esp
-    pushl %ebp
     pushl %esi
     pushl %edi
 
-    cmpl $1, %eax
-    jb invalid
-    cmpl $10, %eax # validicity check
-    ja invalid
+    cmp $1, %eax
+    jl invalid
+    cmp $10, %eax # validicity check
+    jg invalid
     # Push arguments on stack
     pushl %edx	# 3rd argument
     pushl %ecx	# 2nd argument
     pushl %ebx	# 1st argument
     
     call *syscall_table-4(,%eax,4) # eax is the 
-    
+
     # Pop arguments of stack
     addl $12, %esp
+    jmp   done
+
+    
 invalid:
+    movl $-1, %eax
+done:
     # Restore registers
     popl %edi
     popl %esi
-    popl %ebp
     popl %esp
     popl %edx
     popl %ecx
     popl %ebx
     # Restore flags
-    popfl
+    
     iret
 
 syscall_table:

@@ -74,9 +74,9 @@ void set_signal_enable()
 //return: how many bytes are successfully read     no side-effect
 int32_t terminal_read(int32_t fd, void* buf ,int32_t nbytes){   
      
-    printf("in terminal read 1\n");
+    // printf("in terminal read 1\n");
     while(!terminal_read_enable_signal);
-    printf("in terminal read 2\n");
+    // printf("in terminal read 2\n");
     terminal_read_enable_signal = 0;
     
     if (get_keyb_buffer_index()>=TERMINAL_BUF_MAX){ //make sure the bytes we read is no bigger than max buffer size
@@ -85,7 +85,7 @@ int32_t terminal_read(int32_t fd, void* buf ,int32_t nbytes){
         return 0;
     }
     //while the enter is not pressed, wait
-    printf("in terminal_read now\n"); 
+    // printf("in terminal_read now\n"); 
     
     char* keyb_buf = get_keyb_buffer();//get the keyboard buffer pointer
     char* buf1 = (char*) buf;
@@ -96,7 +96,6 @@ int32_t terminal_read(int32_t fd, void* buf ,int32_t nbytes){
     }
     buf1[get_keyb_buffer_index()] = '\0';
     clean_keyb_buffer();//clean the keyboard buffer since it is already read
-
     return i;
 }
 
@@ -107,12 +106,13 @@ int32_t terminal_read(int32_t fd, void* buf ,int32_t nbytes){
 //return : number of bytes that is displayed.
 //side effect: none
 int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
+    cli();
     int i;
     char* buf1 = (char*)buf;
-    // printf("shell>> "); //mark
     for (i=0; i<nbytes; i++) { //go through the buffer pointer first nbytes
         putc(buf1[i]);
     }
+    sti();
     return i;
 }
 

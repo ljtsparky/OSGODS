@@ -12,5 +12,6 @@ int32_t getargs (uint8_t* buf, int32_t nbytes);
 int32_t vidmap (uint8_t** screen_start);
 int32_t set_handler (int32_t signum, void* handler_address);
 int32_t sigreturn (void);
+extern int fail1();
 
 #endif

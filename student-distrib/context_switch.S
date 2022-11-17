@@ -1,7 +1,7 @@
 #define ASM     1
 
 .data
-    STACK = 0x8400000
+    STACK = 0x8400000 - 0x4
     IF_BIT= 0x200
     USER_CS= 0x0023
     USER_DS= 0x002B
@@ -11,7 +11,7 @@
 context_switch_ASM:
     movl 4(%esp),%ebx # Load entry point in EBX
 
-    ; xorl %eax, %eax
+    xorl %eax, %eax
     movl $0, %eax
     movw $USER_DS, %ax     # Push SS on stack 
     pushl %eax              

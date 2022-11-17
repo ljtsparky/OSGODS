@@ -27,7 +27,7 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry){
     // int file_name_length;
     for ( i = 0; i < boot_block->num_dir_entries; i++){
         
-        if (strncmp((int8_t*)boot_block->dir_entries[i].file_name, (int8_t*)fname, (uint32_t)FILE_NAME_SIZE) == 0 && strlen(fname) <= 32){
+        if (strncmp((int8_t*)boot_block->dir_entries[i].file_name, (int8_t*)fname, (uint32_t)FILE_NAME_SIZE) == 0 ){
             memcpy(dentry, boot_block->dir_entries+i, sizeof(dentry_t));
             return 0;
         }
@@ -48,7 +48,7 @@ int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry){
     {
         return -1;
     }
-    memcpy(dentry, boot_block->dir_entries+index, sizeof(dentry_t));
+    memcpy(dentry, boot_block->dir_entries + index, sizeof(dentry_t));
     return 0;
 }
 
@@ -105,26 +105,6 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
     // read length bytes
     memcpy(buf, data_block+current_block*BLOCK_SIZE, read_length);
     return length;
-
-/*
-    for ( i = 0; i < length; i++)
-    {
-        if (block_offset >= boot_block->num_data_blocks)
-        {
-            return -1;
-        }
-        memcpy(buf+i, data_block[current_block]+byte_offset, 1);
-        byte_offset++;
-        if (byte_offset == BLOCK_SIZE)
-        {
-            byte_offset = 0;
-            block_offset++;
-            current_block = inodes->data_blocks[block_offset];
-        }
-        
-    }
-    return i;
-*/
 }
 
 //FILE OPERATIONS
@@ -183,25 +163,13 @@ int32_t file_write(int32_t fd, const void* buf, int32_t nbytes)
  */
 int32_t file_read(int32_t fd, void* buf, int32_t nbytes)
 {
-    //int32_t offset = get_fd_from(fd)->file_position;
-    //int32_t inode = get_fd_from(fd)->inode;
-    //return read_data(inode, offset, buf, nbtypes);
-    //file_object_t file_desc = FILE_ARRAY[fd];
-    //int offset = 0;
-    printf("in file read\n");
     pcb_t* cur_pcb;
-    cur_pcb=get_current_pcb();
-    uint32_t inode = cur_pcb->file_descriptor[fd].inode;
-    uint32_t offset = cur_pcb->file_descriptor[fd].file_position;
-    //uint8_t* buf1= (uint8_t*) buf;
-    //
-    // uint32_t read_nbytes = read_data(global_dentry.inode_id, offset, buf, nbytes);
-    uint32_t read_nbytes = read_data(inode, offset, buf, nbytes);
-    if (read_nbytes < 0)
-    {
-        return -1;
-    }
-    
+    cur_pcb = get_current_pcb(); //first, get the current pcb
+    int32_t inode = cur_pcb->file_descriptor[fd].inode;//then, find the file by using the fd input
+    int32_t offset = cur_pcb->file_descriptor[fd].file_position;// 
+    int32_t read_nbytes = read_data(inode, offset, buf, nbytes);
+    if (read_nbytes < 0) return -1;//immediately check if read data returns failed
+    cur_pcb->file_descriptor[fd].file_position += read_nbytes;//update how many bytes we have read if not failed
     return read_nbytes;
 }
 
@@ -263,13 +231,8 @@ int32_t dir_read(int32_t fd, void* buf, int32_t nbytes)
     }
     cur_pcb->file_descriptor[fd].file_position++;
     if (cur_pcb->file_descriptor[fd].file_position < 63)      // max files number
-    {
         return nbytes;
-    }
-    else
-    {
-        return 0;
-    }
+    return 0;
     
 }
 

@@ -76,7 +76,10 @@ typedef struct pcb{
     file_object_t file_descriptor[MAX_FILE_NUM];  
     int32_t saved_esp;
     int32_t saved_ebp;
+    uint32_t esp0;
     uint32_t active;
+    uint8_t* args;
+    uint32_t vidmap;
 } pcb_t;
 
 // pcb_t* curr_pcb = NULL;
