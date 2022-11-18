@@ -27,37 +27,16 @@ int fail1()
 //side effect: read the data
 int32_t read (int32_t fd, void* buf, int32_t nbytes)
 {
-    
-    pcb_t* curr_pcb = get_current_pcb();
-    // printf("read fd is %d\n", fd);
-    
-    // int type = (rtc_table.read == curr_pcb->file_descriptor[fd].file_op_tb.read) ? 0 : 1;
-    
-    // int length = ((inode_t*)(file_system_start_address + BLOCK_SIZE*(1+curr_pcb->file_descriptor[fd].inode) ))->length;
-
-   
     if (fd < 0 || fd >= MAX_FILE_NUM ||buf == NULL ||nbytes < 0)//if fd is not in 0 to 7, return -1 judge wheterh buf is valid check the input nbytes
     {   
         return -1;
     }
-
+    pcb_t* curr_pcb = get_current_pcb();
     if (curr_pcb->file_descriptor[fd].flag == 0) {
         return -1;
     }
-    // printf("%d",curr_pcb->file_descriptor[fd].file_position);
-
-    // cli();
     int32_t ret = curr_pcb->file_descriptor[fd].file_op_tb.read(fd, buf, nbytes);
-    
-    // curr_pcb->file_descriptor[fd].file_position += ret;
-    // printf("read end, \n");
-    // sti();
     return ret;
-    
-    // if( type  &&  ( curr_pcb->file_descriptor[fd].file_position >= length ) ){
-    //     //printf("********************************************** \n");
-    //     return 0;
-    // }
 }
 //write
 //description: write data to a terminal or RTC
@@ -83,7 +62,7 @@ int32_t write (int32_t fd, const void* buf, int32_t nbytes)
         return -1;
     }
     pcb_t* curr_pcb = get_current_pcb();
-    if (curr_pcb->file_descriptor[fd].flag != 1)
+    if (curr_pcb->file_descriptor[fd].flag == 0)
     {
         return -1;
     }
@@ -121,6 +100,7 @@ int32_t open (const uint8_t* filename){
     switch (type) {
     case RTC_TYPE:
         cur_pcb->file_descriptor[fd].file_op_tb  = rtc_table;
+        cur_pcb->file_descriptor[fd].inode=-1;
         break;
     case DIR_TYPE:
         cur_pcb->file_descriptor[fd].file_op_tb  = dir_table;
@@ -135,7 +115,6 @@ int32_t open (const uint8_t* filename){
     return fd;
 }
 
-#define NUM_IO 2
 //close
 //description: close the file descriptor
 //input: file descriptor
@@ -145,7 +124,13 @@ int32_t open (const uint8_t* filename){
 int32_t close (int32_t fd)
 {
     pcb_t* curr_pcb = get_current_pcb();
+    if (fd==0 || fd==1){
+        return -1;
+    }
     if (fd < MAX_FILE_NUM && fd >= NUM_IO){
+        if (curr_pcb->file_descriptor[fd].flag == 0){
+            return -1;
+        }
         curr_pcb->file_descriptor[fd].flag = 0;
         curr_pcb->file_descriptor[fd].file_op_tb =  (file_operation_table_t) fail_table1;
         curr_pcb->file_descriptor[fd].inode = 0;
@@ -192,7 +177,7 @@ int32_t vidmap (uint8_t** screen_start)
         return -1;
     }
     // judge whether screen start in the user space
-    if ((int)*screen_start < _128MB || (int)*screen_start > _132MB - 4 )
+    if ((int)screen_start < _128MB || (int)screen_start > _132MB - 4 )
     {
         return -1;
     }

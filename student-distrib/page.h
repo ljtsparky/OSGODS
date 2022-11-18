@@ -14,6 +14,9 @@
 #define set_page_base_address_usr1(x) ( (x) | (0x800000 ) )  /* first 22 bits of 8Mb, the shell */
 #define set_page_base_address_usr2(x) ( (x) | (0xC00000 ) )  /* first 22 bits of 12Mb */
 #define set_page_base_address_usr3(x) ( (x) | (0x1000000 ) )  /* first 22 bits of 16Mb */
+#define set_page_base_address_usr4(x) ( (x) | (0x5000000 ) )  /* first 22 bits of 8Mb, the shell */
+#define set_page_base_address_usr5(x) ( (x) | (0x9000000 ) )  /* first 22 bits of 12Mb */
+#define set_page_base_address_usr6(x) ( (x) | (0xD000000 ) )  /* first 22 bits of 16Mb */
 
 extern void init_paging ();
 extern void flush_tlb(unsigned int* page_dir);

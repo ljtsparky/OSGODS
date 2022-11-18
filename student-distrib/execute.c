@@ -8,7 +8,7 @@
 #include "rtc.h"
 #include "x86_desc.h"
 #include "syscall_handler.h"
-#include "context_switch.h"
+// #include "context_switch.h"
 
 file_operation_table_t stdin_table1 = (file_operation_table_t){terminal_open, terminal_read, terminal_bad_write, terminal_close};
 file_operation_table_t stdout_table1 = (file_operation_table_t){terminal_open, terminal_bad_read, terminal_write, terminal_close};
@@ -108,7 +108,7 @@ int32_t execute (const uint8_t* command)
         parent_pcb->saved_esp = parent_esp;
         parent_pcb->saved_ebp = parent_ebp;
     }
-    sti();
+    // sti();
     context_switch(curr_pcb, target_eip_buffer);  
     printf("context switch finished\n");
     return 0;
@@ -121,13 +121,13 @@ int32_t execute (const uint8_t* command)
 * side effect: close the process, restore the parent data and maping 
 */
 int32_t halt (uint8_t status){
-    cli();
     printf("in halt\n");
     if (curr_pcb->parent_id == -1 ){
         printf("we can't exit base!\n");
         pid = 0;
         execute((uint8_t*)"shell");
     }
+    cli();
     pcb_t* parent_pcb = (pcb_t*)(_8MB - _8KB * (curr_pcb->parent_id + 1));//get parent pcb
     //------------------ Restore parent paging ---------------------------------
     int i;   //for iteration
@@ -137,7 +137,7 @@ int32_t halt (uint8_t status){
     }
     curr_pcb->file_descriptor[0].flag = 0;
     curr_pcb->file_descriptor[1].flag = 0;    
-
+    curr_pcb->active=0;
     set_up_paging( curr_pcb->parent_id );
     pid--; 
     tss.esp0 = parent_pcb->esp0;
@@ -147,7 +147,7 @@ int32_t halt (uint8_t status){
     curr_pcb = parent_pcb;
     //------------------ Jump to execute return --------------------------------
     uint16_t retval = (uint16_t) status;
-    // if(status == 0x0F) retval = 256;
+    if(status == 0x0F) retval = 256;
     asm volatile(
                 "movl %1, %%esp ;"
                 "movl %2, %%ebp ;"
@@ -229,7 +229,7 @@ void create_pcb(pcb_t* pcb, int pid, uint8_t* args)
     pcb->pid =(uint32_t) pid;
     pcb->args = args;
     // strncpy((int8_t*)(pcb->args), (int8_t*)args, MAX_ARGS_SIZE);
-    pcb->active = 0;
+    pcb->active = 1;
     pcb->esp0 = _8MB - _8KB * (pid) - 4;  // 4 bytes for align
     if ( pid == 0) {
         pcb->parent_id = -1;
@@ -252,6 +252,7 @@ void context_switch(pcb_t* pcb, uint8_t* entry_ptr){
     uint32_t ESP = _128MB + _4MB - _4_bytes_align;
     uint32_t XCS = USER_CS;
     uint32_t EIP = * (uint32_t*) entry_ptr;
+    sti();
     asm volatile(
         "movw  %%ax, %%ds;"
         "pushl %%eax;"

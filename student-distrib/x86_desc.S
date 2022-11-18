@@ -139,7 +139,3 @@ page_vid_table:
     .long 0
     .endr
 page_vid_table_bottom:
-
-
-
-    

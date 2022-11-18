@@ -1,7 +1,7 @@
 #include "rtc.h"
 #include "lib.h"
 #include "i8259.h"
-
+#include "execute.h"
 volatile int rtc_interrupt_occurred;    //flag to sychronize between rtc_read and rtc_intr_handler
 int rtc_interrupt_counter;      //counter to test the change of frequency
 /*
@@ -17,9 +17,24 @@ void rtc_intr_handler()
     cli();
     // rtc_write(0,&frequency[  ((count++)/20) % 9],4);
     // putc('@');
-    
+    int pid, fd;
+    pcb_t* pcb_start;
     rtc_interrupt_occurred = 1;//when an interrupt occurs, set the flag and add the counter
     rtc_interrupt_counter++;
+    for (pid=0;pid<MAX_NUM_PID;pid++){
+        pcb_start=(pcb_t*)(_8MB-(pid+1)*_8KB);
+        if (pcb_start->active==0){
+            //if not active, go to the next possibly opened pcb
+            continue;
+        }            
+        for (fd=0;fd<MAX_FILE_NUM;fd++){
+            //for each file
+            if (pcb_start->file_descriptor[fd].inode == -1 && pcb_start->file_descriptor[fd].flag==1) {
+                pcb_start->file_descriptor[fd].file_position ++;
+                break;
+            }
+        }                                                                                                                                                         
+    }
     /* Make RTC keep receiving interrupts*/
     outb(RTC_STATUS_REG_C, RTC_REG_PORT);
     inb(CMOS_PORT);
@@ -64,6 +79,7 @@ int32_t rtc_open (const uint8_t* filename)
     /* initialize RTC frequency to 2Hz */
     outb(RTC_STATUS_REG_A, RTC_REG_PORT);
     outb(FREQUENCY_2_RATE, CMOS_PORT);
+    // pcb_t* curr_pcb = get_current_pcb();
     return 0;
 }
 
@@ -75,6 +91,8 @@ int32_t rtc_open (const uint8_t* filename)
  * */
 int32_t rtc_close (int32_t fd)
 {
+    pcb_t* pcb = get_current_pcb();
+    pcb->file_descriptor[fd].file_position = 0;
     return 0;
 }
 
@@ -87,9 +105,12 @@ int32_t rtc_close (int32_t fd)
  * */
 int32_t rtc_read (int32_t fd, void* buf, int32_t nbytes)
 {
-    while (rtc_interrupt_occurred != 1){}      //when an interrupt doesn't occur, just wait
-    printf("in rtc read\n");
-    rtc_interrupt_occurred = 0;              //reset the flag after an interrupt
+    // while (rtc_interrupt_occurred != 1){}      //when an interrupt doesn't occur, just wait
+    // printf("in rtc read\n");
+    // rtc_interrupt_occurred = 0;              //reset the flag after an interrupt
+    pcb_t* pcb = get_current_pcb();
+    while (pcb->file_descriptor[fd].file_position == 0);
+    pcb->file_descriptor[fd].file_position = 0;
     return 0;
 }
 
@@ -104,7 +125,7 @@ int32_t rtc_read (int32_t fd, void* buf, int32_t nbytes)
 int32_t rtc_write (int32_t fd, const void* buf, int32_t nbytes)
 {
     /* check for the fail condition */
-    cli();
+    
     if (nbytes != 4 || NULL == buf ){//the integer must be 4 bytes & the pointer can't be NULL
         return -1;
     }
@@ -118,7 +139,6 @@ int32_t rtc_write (int32_t fd, const void* buf, int32_t nbytes)
     //if ((rtc_frequency & (!rtc_frequency)) != 0){       
         return -1;
     }
-    
     uint8_t rate;
     int i;
     for (i = 0; i < 15; i++){                     //rate can be 0-15
@@ -130,6 +150,5 @@ int32_t rtc_write (int32_t fd, const void* buf, int32_t nbytes)
     
     outb(RTC_STATUS_REG_A, RTC_REG_PORT);         //change to new frequency
     outb(rate, CMOS_PORT);
-    sti();
     return 4;                                     //write 4 bytes
 }

@@ -41,3 +41,18 @@ which is 0x400000 to right shift 12 because 12 is exactly 4MB, as a result we ge
 
 ## BUG 9
 2022 NOV 7 Shen Xing: also the bug that happens in halt and execute, when we execute halt, we found that our function jump into a unknown place. So we check the halt function for a while, it is not a difficult bug, and finally we found that we didn't set the current pcb in the halt function.
+## bug 10
+halt with leave return will works
+## we need cli sti for terminal write
+## bug 11
+2022 Nov 16, In filesystem.c, when using strlen, fname type didn't transfer to int8_t* type. In terminal read, we can't have cli before the while loop that keeps waiting for keyboard enter signal, cause it stops any interrupt from keyboard and we can't type in anything.
+## bug 12
+2022 Nov 18, in rtc interrupt handler, used inode=-1 to indicate this fd is rtc file, and then in handler, increase the file position of it,
+which then make rtc read while loop ends, the reason to use this new approach is that:
+## bug 13
+2022 Nov 18, ljt: in syscall.c uint8_t** screen_start input, when determine whether it's in the range of 128 to 132 MB, we need to use
+(int)screen_start
+## bug 14
+2022 Nov 18, ljt: in execute.c, we need to update the pcb->active to be 1 when created and 0 when it is halted and exit. That's because when we
+go through all the 6 pcb's, there might be some active pcb after the unactive ones, and we need to know which to be edit its
+pcb->file_descriptor[fd].file_position and in rtc read while loop will end?

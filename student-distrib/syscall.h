@@ -4,6 +4,7 @@
 #define RTC_TYPE 0
 #define FILE_TYPE 2
 #define DIR_TYPE 1
+#define NUM_IO 2
 int32_t read (int32_t fd, void* buf, int32_t nbytes);
 int32_t write (int32_t fd, const void* buf, int32_t nbytes);
 int32_t open (const uint8_t* filename);

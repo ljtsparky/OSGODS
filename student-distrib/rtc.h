@@ -19,11 +19,15 @@
 // extern void rtc_intr_handler();
 
 // #endif
-
 #ifndef _RTC_H
 #define _RTC_H
 
 #include "types.h"
+
+
+#define _8MB    0x800000
+#define _8KB    0x2000 //0x10 0000 0000 0000
+#define MAX_NUM_PID  6
 
 #define RTC_IRQ 8
 #define ZERO_ASCII 0x30

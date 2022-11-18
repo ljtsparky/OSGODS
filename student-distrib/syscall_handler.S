@@ -12,7 +12,7 @@
 
 
 syscall_linkage:
-  
+    pushfl
     pushl %ebx
     pushl %ecx
     pushl %edx
@@ -46,8 +46,7 @@ done:
     popl %edx
     popl %ecx
     popl %ebx
-    # Restore flags
-    
+    popfl
     iret
 
 syscall_table:

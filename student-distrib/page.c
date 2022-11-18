@@ -88,6 +88,9 @@ int set_up_paging(int pid)
     if (pid == 0)  pde_4m_usr = set_page_base_address_usr1(pde_4m_usr); // set the base address in physics memory for first program
     if (pid == 1)  pde_4m_usr = set_page_base_address_usr2(pde_4m_usr); // set the base address in physics memory for second program
     if (pid == 2)  pde_4m_usr = set_page_base_address_usr3(pde_4m_usr); // set the base address in physics memory for second program
+    if (pid == 3)  pde_4m_usr = set_page_base_address_usr4(pde_4m_usr); // set the base address in physics memory for first program
+    if (pid == 4)  pde_4m_usr = set_page_base_address_usr5(pde_4m_usr); // set the base address in physics memory for second program
+    if (pid == 5)  pde_4m_usr = set_page_base_address_usr6(pde_4m_usr); // set the base address in physics memory for second program
     pde_4m_usr = set_read_write_1(pde_4m_usr); 
     pde_4m_usr = set_use_supervisor(pde_4m_usr); //set user supervisor 1 
     page_dir[32] = pde_4m_usr;  /* virtual memory is 128MB so index of page dir is 128MB / 4MB = 32*/
@@ -105,7 +108,7 @@ int set_up_paging(int pid)
 void unmap_paging()
 {
     cli();
-    page_dir[32] = 0;
+    page_dir[33] = 0;
     flush_tlb(page_dir);
     sti();
 }
