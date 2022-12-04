@@ -1,36 +1,3 @@
-// /* types.h - Defines to use the familiar explicitly-sized types in this
-//  * OS (uint32_t, int8_t, etc.).  This is necessary because we don't want
-//  * to include <stdint.h> when building this OS
-//  * vim:ts=4 noexpandtab
-//  */
-
-// #ifndef _TYPES_H
-// #define _TYPES_H
-
-// #define NULL 0
-
-// #ifndef ASM
-
-// /* Types defined here just like in <stdint.h> */
-// typedef int int32_t;
-// typedef unsigned int uint32_t;
-
-// typedef short int16_t;
-// typedef unsigned short uint16_t;
-
-// typedef char int8_t;
-// typedef unsigned char uint8_t;
-
-// #endif /* ASM */
-
-// #endif /* _TYPES_H */
-
-/* types.h - Defines to use the familiar explicitly-sized types in this
- * OS (uint32_t, int8_t, etc.).  This is necessary because we don't want
- * to include <stdint.h> when building this OS
- * vim:ts=4 noexpandtab
- */
-
 #ifndef _TYPES_H
 #define _TYPES_H
 
@@ -51,6 +18,8 @@ typedef unsigned char uint8_t;
 #define PCB_SIZE 400
 #define MAX_FILE_NUM 8
 #define MIN_FILE_NUM 0
+
+#include "lib.h"
 
 typedef struct file_operation_table
 {
@@ -78,12 +47,33 @@ typedef struct pcb{
     int32_t saved_ebp;
     uint32_t esp0;
     uint32_t active;
-    uint8_t* args;
+    uint8_t* argument;
     uint32_t vidmap;
+    uint32_t tss_esp0;
+    int tid; //which tid was it created?
+    // int terminal_pid; //which terminal pid
 } pcb_t;
 
-// pcb_t* curr_pcb = NULL;
-// pcb_t* parent_pcb = NULL;
+typedef struct terminal {
+    uint32_t tid;
+    int8_t* video_page;
+    int x_cursor;
+    int y_cursor;
+    pcb_t*    pcb_ptr;
+    uint32_t  count_pcb;
+    char*   keyb_buffer;
+    int32_t  keyb_buffer_index;
+    void*   next_terminal;
+    int vidmap;
+    int prev_screen_x[25];    /* store the previous x location when '\n' is pressed */
+    int i_prev_x;               /* prev x location index*/
+    char display_buf[80*25];   /* display buffer */
+    int display_buf_index ;      /* index for display input buffer */
+    int line_is_full[25];  
+} terminal_t;
+
+terminal_t  terminal_list[3];   /* we have 3 terminal in total */
+// terminal_t* curr_terminal_ptr = NULL;
 
 #endif /* ASM */
 

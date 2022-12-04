@@ -2,15 +2,21 @@
  * vim:ts=4 noexpandtab */
 
 #include "lib.h"
+#include "execute.h"
+#include "terminal.h"
 
 #define VIDEO       0xB8000
 #define NUM_COLS    80
 #define NUM_ROWS    25
 #define ATTRIB      0x7
 
-static int screen_x;
-static int screen_y;
-static char* video_mem = (char *)VIDEO;
+int screen_x;
+int screen_y;
+char* video_mem = (char *)VIDEO;
+int* screen_x_ptr = &screen_x;
+int* screen_y_ptr = &screen_y;
+int** screen_x_pp = &screen_x_ptr;
+int** screen_y_pp = &screen_y_ptr;
 
 /* void clear(void);
  * Inputs: void
@@ -24,6 +30,9 @@ void clear(void) {
     }
     screen_x = 0;   /* go to the top left corner of the screen */
     screen_y = 0;
+    terminal_list[get_display_tid()].x_cursor = 0;
+    terminal_list[get_display_tid()].y_cursor = 0;
+    // execute((uint8_t*)"shell");
 }
 
 /* Standard printf().
@@ -165,6 +174,12 @@ int32_t puts(int8_t* s) {
     return index;
 }
 
+int keyb_pressed = 0;
+void set_keyb_pressed()
+{
+    keyb_pressed = 1;
+}
+
 
 int prev_screen_x[NUM_ROWS];    /* store the previous x location when '\n' is pressed */
 int i_prev_x = 0;               /* prev x location index*/
@@ -172,11 +187,51 @@ char display_buf[NUM_COLS*NUM_ROWS];   /* display buffer */
 int display_buf_index = 0;      /* index for display input buffer */
 int line_is_full[NUM_ROWS];     /* indicate which line is full */
 
+//load_terminal_screen_settings
+//input: terminal id to be executed
+//output: none
+//side effect:
+void load_terminal_screen_settings(int tid)
+{
+    int i;
+    for (i=0;i<NUM_ROWS;i++){
+        prev_screen_x[i] = terminal_list[tid].prev_screen_x[i];
+        line_is_full[i] = terminal_list[tid].line_is_full[i];
+    }
+    for (i=0; i<NUM_COLS*NUM_ROWS; i++) {
+        display_buf[i] = terminal_list[tid].display_buf[i];
+    }
+    i_prev_x = terminal_list[tid].i_prev_x;
+    display_buf_index = terminal_list[tid].display_buf_index;
+}
+
+void restore_terminal_screen_settings(int tid)
+{
+    int i;
+    for (i=0;i<NUM_ROWS;i++){
+        terminal_list[tid].prev_screen_x[i] =  prev_screen_x[i];
+        terminal_list[tid].line_is_full[i] = line_is_full[i];
+    }
+    for (i=0; i<NUM_COLS*NUM_ROWS; i++) {
+        terminal_list[tid].display_buf[i] = display_buf[i] ;
+    }
+    terminal_list[tid].i_prev_x = i_prev_x;
+    terminal_list[tid].display_buf_index = display_buf_index;
+}
 /* void putc(uint8_t c);
  * Inputs: uint_8* c = character to print
  * Return Value: void
  *  Function: Output a character to the console */
 void putc(uint8_t c) {
+
+    int tid;
+    if (keyb_pressed)
+        tid = get_display_tid();
+    else
+        tid = get_scheduled_tid();
+    keyb_pressed=0;
+    // load_terminal_screen_settings(tid);
+
     /* display buffer is full, clean it */
     if (display_buf_index == NUM_COLS*NUM_ROWS) {
         display_buf_index = 0;
@@ -305,6 +360,9 @@ void putc(uint8_t c) {
 draw_:  /* draw the '_' */
     *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = '_';
     *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
+    // restore_terminal_screen_settings(tid);
+    terminal_list[tid].x_cursor = screen_x;
+    terminal_list[tid].y_cursor = screen_y;
 }
 
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);
@@ -615,4 +673,28 @@ void delay(uint32_t t)
         uint32_t i=0x800000;
         while (i--);
     }
+}
+
+/* read current screen_x */
+int read_screen_x ()
+{
+    return screen_x;
+}
+
+/* read current screen_y*/
+int read_screen_y ()
+{
+    return screen_y;
+}
+
+/* update current cursor */
+void update_screen_x_y(int x_cursor, int y_cursor)
+{
+    screen_x = x_cursor;
+    screen_y = y_cursor;
+}
+
+void update_video_mem(int8_t* new_vid_mem)
+{
+    video_mem = new_vid_mem;
 }

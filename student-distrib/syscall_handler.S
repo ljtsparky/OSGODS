@@ -21,9 +21,9 @@ syscall_linkage:
     pushl %edi
 
     cmp $1, %eax
-    jl invalid
+    jl invalid_num
     cmp $10, %eax # validicity check
-    jg invalid
+    jg invalid_num
     # Push arguments on stack
     pushl %edx	# 3rd argument
     pushl %ecx	# 2nd argument
@@ -36,7 +36,7 @@ syscall_linkage:
     jmp   done
 
     
-invalid:
+invalid_num:
     movl $-1, %eax
 done:
     # Restore registers

@@ -9,7 +9,11 @@
 uint8_t master_mask; /* IRQs 0-7  */
 uint8_t slave_mask;  /* IRQs 8-15 */
 
-/* Initialize the 8259 PIC */
+/* i8259_init
+ * input: none
+ * output: none
+ * side effect:Initialize the 8259 PIC 
+ */
 void i8259_init(void)
 {
     // printf("try initialize i8259\n");

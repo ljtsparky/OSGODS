@@ -1,6 +1,7 @@
 #ifndef _KEYBORAD_H
 #define _KEYBOARD_H
 
+#include "lib.h"
 #define KEYB_IRQ 1
 #define KEYB_PORT_DATA    0x60
 #define KEYB_PORT_COMMAND 0x64
@@ -20,8 +21,11 @@
 #define LEFT_SHIFT_UP   0xAA
 #define LEFT_CTRL_DOWN  0x1D
 #define LEFT_CTRL_UP    0x9D
-// #define LEFT_ALT_DOWN   0x38
-// #define LEFT_ALT_UP     0xB8
+#define LEFT_ALT_DOWN   0x38
+#define LEFT_ALT_UP     0xB8
+#define F1_DOWN         0x3B
+#define F2_DOWN         0x3C
+#define F3_DOWN         0x3D
 #define CASPLK_CHANGE   0x3A
 #define BACKSPACE_DOWN  0x0E
 #define DOWN            1
@@ -34,6 +38,7 @@
 
 #define KEYB_MAP_L_INDEX    38      /* index of 'L' is keyboard map */
 #define KEYB_MAP_TAB_INDEX  15      /* index of '\t' is keyboard map */
+#define KEYB_BUFFER_SIZE 128
 
 void init_keyb();
 void keyb_intr_handler();
@@ -43,4 +48,5 @@ void set_read_signal_enable();
 char* get_keyb_buffer();
 void clean_keyb_buffer();
 int get_keyb_buffer_index();
+void update_keyb_buf(int8_t* new_keyb_buf, int new_index);
 #endif

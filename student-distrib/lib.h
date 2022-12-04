@@ -8,13 +8,15 @@
 #include "types.h"
 
 int32_t printf(int8_t *format, ...);
+void set_keyb_pressed();
 void putc(uint8_t c);
 int32_t puts(int8_t *s);
 int8_t *itoa(uint32_t value, int8_t* buf, int32_t radix);
 int8_t *strrev(int8_t* s);
 uint32_t strlen(const int8_t* s);
 void clear(void);
-
+void load_terminal_screen_settings(int tid);
+void restore_terminal_screen_settings(int tid);
 void delay(uint32_t t);
 #define KEYB_BUFF_LEN 128
 #define SPACES_NUM 4        /* number of spaces drawed when Tab is pressed */
@@ -27,7 +29,10 @@ extern void* memmove(void* dest, const void* src, uint32_t n);
 int32_t strncmp(const int8_t* s1, const int8_t* s2, uint32_t n);
 int8_t* strcpy(int8_t* dest, const int8_t*src);
 int8_t* strncpy(int8_t* dest, const int8_t*src, uint32_t n);
-
+int read_screen_x ();
+int read_screen_y ();
+void update_screen_x_y(int x_cursor, int y_cursor);
+void update_video_mem(int8_t* new_vid_mem);
 /* Userspace address-check functions */
 int32_t bad_userspace_addr(const void* addr, int32_t len);
 int32_t safe_strncpy(int8_t* dest, const int8_t* src, int32_t n);

@@ -3,6 +3,8 @@
 #include "keyboard.h"
 #include "rtc.h"
 #include "syscall_handler.h"
+#include "pit.h"
+#include "intr_wrapper.h"
 /* exception handler function table */
 void *exception_handler_table[20] = { // we use this table to locate the function address of these handlers
     DIVIDE_ERROR_EXC_HANDLER,
@@ -58,10 +60,12 @@ void init_idt()
     {
         SET_IDT_ENTRY(idt[i], exception_handler_table[PERSERVED_EXCEPTION]);
     }
+    idt[PIT_INTERRUPT_INDEX].reserved3 = 0;
+    SET_IDT_ENTRY(idt[PIT_INTERRUPT_INDEX], pit_wrapper); // pit interrupt
     idt[KEYB_INTERRUPT_INDEX].reserved3 = 0;
-    SET_IDT_ENTRY(idt[KEYB_INTERRUPT_INDEX], keyb_intr_handler); // keboard interrupt
+    SET_IDT_ENTRY(idt[KEYB_INTERRUPT_INDEX], keyb_wrapper); // keboard interrupt
     idt[RTC_INTERRUPT_INDEX].reserved3 = 0;
-    SET_IDT_ENTRY(idt[RTC_INTERRUPT_INDEX], rtc_intr_handler); // rtc interrupt
+    SET_IDT_ENTRY(idt[RTC_INTERRUPT_INDEX], rtc_wrapper); // rtc interrupt
     idt[SYSTEM_CALL_INT].dpl = 3;
     SET_IDT_ENTRY(idt[SYSTEM_CALL_INT], syscall_linkage);
     

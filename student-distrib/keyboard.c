@@ -3,6 +3,8 @@
 #include "lib.h"
 #include "i8259.h"
 #include "terminal.h"
+#include "execute.h"
+#include "page.h"
 
 volatile int copy_signal = 0; /* signal sent to terminal_read function indicating read is allowed */
 char key_buffer[KEYB_BUFF_LEN]; /* interrupt keyboard buffer */
@@ -75,24 +77,12 @@ typedef struct command_status
     int left_ctrl;
     int left_alt;
     int capslk;
+    int alt;
 } command_status;
 
 command_status status; /* current status of function command */
 
-/*
- *clean_keyb_buffer
- * description: clean the memory of keyboard buffer
- * input: none
- * output: none
- */
-void clean_keyb_buffer()
-{
-    int i;
-    for (i=0; i<keyb_index; i++) {
-        key_buffer[i] = 0;
-    }
-    keyb_index = 0;
-}
+
 /*
  *init_keyb
  * description: initialize the keyboard
@@ -106,6 +96,7 @@ void init_keyb ()
     status.left_shift = UP;
     status.left_ctrl = UP;
     status.left_alt = UP;
+    status.alt = UP;
     printf("keyboard interrupt enabled \n");
 }
 
@@ -115,12 +106,12 @@ void init_keyb ()
  * inputs: none
  * outputs: none
  */
+int prev_display_tid = 0;
 void keyb_intr_handler ()
 {
     cli();
     int keyb_input = inb(KEYB_PORT_DATA); /* keyboard map index */
     
-
     /* handle the function command status change */
     switch (keyb_input)
     {
@@ -140,6 +131,14 @@ void keyb_intr_handler ()
         status.left_ctrl= UP;
         goto end;
 
+    case LEFT_ALT_DOWN:
+        status.alt = DOWN;
+        goto end;
+    
+    case LEFT_ALT_UP:
+        status.alt = UP;
+        goto end;
+
     case CASPLK_CHANGE:
         if (status.capslk == DOWN) {
             status.capslk = UP;
@@ -152,9 +151,31 @@ void keyb_intr_handler ()
         break;
     }
 
+    int display_tid = get_display_tid();
+    update_video_mem((int8_t*)VIDEO_MEMORY_ADDR); /* update video address in putc */
+    update_screen_x_y(terminal_list[display_tid].x_cursor, terminal_list[display_tid].y_cursor); /* update the cursor */
+    
     /* handle the case when ctrl and l is down */
     if (status.left_ctrl == DOWN && keyb_input == KEYB_MAP_L_INDEX ) {
         clear();
+        goto end;
+    }
+
+    if (status.alt == DOWN && keyb_input == F1_DOWN) {
+        terminal_switch(0);
+        // printf("F1 DOWN    ");
+        goto end;
+    }
+
+    if (status.alt == DOWN && keyb_input == F2_DOWN) {
+        terminal_switch(1);
+        // printf("F2 DOWN    ");    
+        goto end;
+    }
+
+    if (status.alt == DOWN && keyb_input == F3_DOWN) {
+        terminal_switch(2);
+        // printf("F3 DOWN    ");
         goto end;
     }
 
@@ -177,38 +198,37 @@ void keyb_intr_handler ()
         else if (status.capslk == UP && status.left_shift == UP) {
             display_char = keyboard_map[NO_COMMAND_DOWN_INDEX][keyb_input];
         }
-        /* no need to add delete to the keyboard input buffer */
 
-        /* case when keyboard buffer is full */
-        // if (keyb_index == KEYB_BUFF_LEN) {  
-        //     printf("\nKeyboard buffer is full!!\n");
-        //     clean_keyb_buffer();
-        // }
         /* delete the memory of keyboard buffer when backspace is pressed */
         if (display_char == '\b') {
             if (keyb_index == 0) {  /* if no keyboard interrrupt no need to delete */
-                putc('\b');
+                // putc('\b');
                 goto end;
             }
-            --keyb_index;   
+            --keyb_index;  
+            set_keyb_pressed(); 
             putc('\b');
             goto end;
         }
         
         /* store the keyboard buffer */
+        set_keyb_pressed();
         key_buffer[keyb_index++] = display_char; 
         putc(display_char);     /* display the character */
         if (display_char == '\n') {
-            // char 
-            // terminal_read(0,)
             set_signal_enable();
-            // int temp = terminal_read(0, buf, keyb_index); //record the number of bytes we read
-            // terminal_write(0, buf, temp); //write it out
         }
     }
 /* return cancel the critical section and send EOI*/
-end:
+end: 
     sti();
+    int scheduled_tid = get_scheduled_tid();
+    display_tid = get_display_tid();
+    if (scheduled_tid != display_tid) {
+        update_video_mem(terminal_list[scheduled_tid].video_page);
+    } else {
+        update_video_mem((int8_t*)VIDEO_MEMORY_ADDR);
+    }
     send_eoi(KEYB_IRQ);
 }
 
@@ -259,4 +279,39 @@ char* get_keyb_buffer()
  */
 int get_keyb_buffer_index(){
     return keyb_index;
+}
+
+/* update_keyb_buf
+ * description: update index of keyboard buffer 
+ * inputs: new keyboard buffer index 
+ * outputs: none
+ */
+void update_keyb_buf(char* new_keyb_buf, int new_index){
+    int i;
+    cli();
+    keyb_index = new_index;
+    if (new_index == 0) {
+        clean_keyb_buffer();
+        sti();
+        return;
+    } 
+    for (i=0; i<new_index; i++) {
+        key_buffer[i] = new_keyb_buf[i];
+    }
+    sti();  
+}
+
+/*
+ *clean_keyb_buffer
+ * description: clean the memory of keyboard buffer
+ * input: none
+ * output: none
+ */
+void clean_keyb_buffer()
+{
+    int i;
+    for (i=0; i<keyb_index; i++) {
+        key_buffer[i] = 0;
+    }
+    keyb_index = 0;
 }

@@ -173,7 +173,7 @@ int test_terminal_write()
 int test_terminal_read()
 {
 	TEST_HEADER;
-	char test1[TERMINAL_BUF_MAX];
+	char test1[128];	/* 128 is max number of char in keyboard buffer */
 	int i;
 	/* test the case when enter is not pressed */
 	for (i = 0; i < 2; i++)
@@ -194,93 +194,6 @@ int test_terminal_read()
 	}
 	return PASS;
 }
-
-/*
- *name:file_test_1
- *function: print the file list
- *test functions: open_dir, read_dir, write_dir, close_dir, read_dentry_by_index
- */
-int file_test_1(void)
-{
-	TEST_HEADER;
-	int32_t i, j, fd = 2;
-	char buf[FILE_NAME_SIZE+1] = {0}; //32 is the maximum size of FILE NAME
-	int32_t nbytes = 17; // 17 is the total bytes we need
-	unsigned char dot = '.'; //dot is the start of 
-	uint8_t *dir_name = &dot;
-	dentry_t *file_pt;
-	file_object_t directory;
-	directory.inode = 0;
-	directory.file_position = 0;
-	// directory.flag = 0;
-	FILE_ARRAY[fd] = directory;
-	dir_open(dir_name);
-	printf("dir opened");
-	// print the file list
-	for (i = 0; i < boot_block->num_dir_entries; i++)
-	{
-		// putc('@');
-		file_pt = (dentry_t *)(&boot_block->dir_entries[i]);
-		// putc('@');
-		dir_read(fd, buf, nbytes);
-		// putc('@');
-		printf("file #%d", i);
-		for (j = 0; j < FILE_NAME_SIZE; j++)
-		{
-			putc(buf[j]);
-		}
-		printf("file type: %d, file size: %d\n", file_pt->file_type, ((inode_t *)(file_system_start_address + (1 + file_pt->inode_id) * BLOCK_SIZE))->length);
-	}
-	if (dir_write(fd, buf, nbytes) < 0){
-		printf("dir writing failed!!!");
-	}
-	dir_close(fd);
-	return PASS;
-}
-
-// index test
-/*
- *name:file_test_2
- *function: this function will print different file content with their index
- *test functions: read_dentry_by_index, read_data
- *input: file index
- *output: print figure
- */
-int file_test_2(uint32_t index)
-{
-	TEST_HEADER;
-	int i;
-	uint8_t buf[4 * 1024]; // 4kB
-	dentry_t new_dentry;
-	// uint8_t flag = 0;
-	inode_t *inode;
-	uint8_t *file_name;
-	int offset = 0;
-	int32_t length;
-	printf("\n\nfile system testing with index :%d\n\n", index);
-	read_dentry_by_index(index, &new_dentry);
-	file_name = new_dentry.file_name;
-	inode = (inode_t *)(file_system_start_address + (new_dentry.inode_id + 1) * BLOCK_SIZE);
-	length = inode->length;
-	printf("file name is %s, length%d\n", file_name, length);
-
-	// for (i=0; i<20; i++)
-	// printf("%d\t", inode->data_blocks[i]);	// show top 20 data block index
-	if (read_data(new_dentry.inode_id, offset, buf, length) <= 0)
-	{
-		printf("read data failed\n");
-	}
-	printf("content of the file at index %d is:\n", index);
-	// print the buf, print the file content
-	for (i = 0; i < length; i++)
-	{
-		putc(buf[i]);
-	}
-	printf("read_dentry_by_index successed\n");
-	printf("read_data successed\n");
-	return PASS;
-}
-
 
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */

@@ -156,13 +156,13 @@ int32_t getargs (uint8_t* buf, int32_t nbytes)
     /* determine whether args in user space or not */
     if (buf == NULL || nbytes == 0)
         return -1;
-    if ((int)buf + nbytes > _132MB - 4 || (int)buf < _128MB  )
+    if ((int)buf + nbytes > _132MB - 4 || (int)buf < _128MB  )  
         return -1;
     pcb_t* pcb = get_current_pcb();
     /* check the valid of args*/
-    if (pcb->args[0] == '\0')
+    if (pcb->argument[0] == '\0')
         return -1;
-    strncpy((int8_t*)buf, (int8_t*)pcb->args, nbytes);    /* copy args from pcb to buf */
+    strncpy((int8_t*)buf, (int8_t*)pcb->argument, nbytes);    /* copy argument from pcb to buf */
     return 0;
 }
 
@@ -181,10 +181,19 @@ int32_t vidmap (uint8_t** screen_start)
     {
         return -1;
     }
-    // if ((int32_t)screen_start>>_4KB_PAGE_TOP_10_OFFSET  < 32 || (int32_t)screen_start>>_4KB_PAGE_TOP_10_OFFSET >= (32+1)){return -1;}
+    set_user_video_map();
+    int display_tid, scheduled_tid;
+    display_tid = get_display_tid();
+    scheduled_tid = get_scheduled_tid();
+    if (display_tid != scheduled_tid) {
+        terminal_list[scheduled_tid].vidmap = 1;
+        set_vid_map(terminal_list[scheduled_tid].video_page, 1);
+    } else {
+        terminal_list[display_tid].vidmap = 1;
+        set_vid_map((int8_t*)VIDEO_MEMORY_ADDR, 1);
+    }
     pcb_t* pcb = get_current_pcb();
     set_up_paging(pcb->pid);
-    set_user_video_map();
     *screen_start = (uint8_t*)_132MB;
     return 0;
 }

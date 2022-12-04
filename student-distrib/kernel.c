@@ -17,6 +17,8 @@
 #include "types.h"
 #include "syscall_handler.h"
 #include "syscall.h"
+#include "cursor.h"
+#include "pit.h"
 #define RUN_TESTS
 
 /* Macros. */
@@ -144,23 +146,30 @@ void entry(unsigned long magic, unsigned long addr) {
         tss.esp0 = 0x800000;
         ltr(KERNEL_TSS);
     }
+    
     /* Init the idt */
     init_idt();
-    /* Init the paging */
-    init_paging();
     /* Init the PIC */
     i8259_init();
+    /* Init the paging */
+    init_paging();
+    /* Init the pit */
+    init_pit();
     /* Init the keyboard */
     init_keyb();
     /* Init the rtc */
     init_rtc();
-    /* Init the file system */
-    file_system_init(file_system_start_address);
     /* Init the terminal */
     terminal_init();
-    printf(" Enabling Interrupts\n");
-    sti();
+    /* Init the file system */
+    file_system_init(file_system_start_address);
+
+    disable_cursor();
+
     clear();
+    // printf(" Enabling Interrupts\n");
+    sti();
+   
 
 #ifdef RUN_TESTS
     /* Run tests */
