@@ -27,7 +27,7 @@ void init_pit()
  */
 void pit_intr_handler()
 {
-    send_eoi(PIT_IRQ);
+    send_eoi(PIT_IRQ); // Notify the PIC (Programmable Interrupt Controller) that the PIT interrupt has been handled.
     memory_switch();
     scheduler();   
 }
