@@ -17,9 +17,9 @@ Device Management: device communication via signals and interruptions.
 
 ## My contribution
 
-# Main contribution in
-* 8259 interrupt controller, system call handler, video memory switch, context switch, file system, signal handling, terminal switch, scheduler, cursor, execute method
-# Rest of the functions that I helped with debugging include
+* Main contribution in
+* 8259 interrupt controller, system call handler, video memory switch, context switch, file system, signal handling, terminal switch, scheduler, cursor, execute method, paging
+* Rest of the functions that I helped with debugging include
 * keyboard, rtc interrupt handling
 
 ## Installation 
