@@ -1,3 +1,33 @@
+# OSGODS
+
+Implemented by me and my teamate, this OS started from scratch with QEMU. 
+* Jiatong Li
+* Chenghao Mo
+* Xing Shen
+* Junhao Zhu
+
+# Functionalities
+Process Management: creation, scheduling, and termination of processes. It manages process states, keeps track of processor activity, and performs context switching to ensure that each process gets fair access to the CPU.
+
+Memory Management: allocation and deallocation of memory space. Keeps track of each byte in a computer's memory and manages partitioning, swapping between main memory and disk when necessary (virtual memory).
+
+File System Management: file creation, deletion, reading, writing. 
+
+Device Management: device communication via signals and interruptions. 
+
+## My contribution
+
+# Main contribution in
+* 8259 interrupt controller, system call handler, video memory switch, context switch, file system, signal handling, terminal switch, scheduler, cursor, execute method
+# Rest of the functions that I helped with debugging include
+* keyboard, rtc interrupt handling
+
+## Installation 
+
+* Install QEMU version < 4.0
+* For windows user, simply run .bat file: `path_to_qemu\qemu-system-i386w.exe -hda "path_to_kernel\mp3.img" -hdb "path_to_disk\image\ece391.qcow" -soundhw sb16 -m 256 -gdb tcp:127.0.0.1:1234 -name mp3`
+  * replace `path_to_*` file path to your path to  `qemu-system-i386w.exe`(QEMU executable),`mp3.img`(kernel image),   `image\ece391.qcow`(disk image)
+
 ACADEMIC INTEGRITY
 -----
 Please review the University of Illinois Student Code before starting,
